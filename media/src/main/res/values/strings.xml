@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">MediaChoices</string>
+    <string name="not_net_error">网络不给力，轻触屏幕重新加载吧~</string>
+    <string name="not_data">没有更多数据哦>></string>
+    <string name="you_media_not_file">您的媒体库还没有文件哦</string>
+    <string name="all_file">全部文件</string>
+    <string name="all_video">全部视频</string>
+    <string name="master_map">原图</string>
+    <string name="sender">发送</string>
+</resources>

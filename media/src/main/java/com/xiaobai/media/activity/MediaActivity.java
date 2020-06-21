@@ -1,6 +1,8 @@
 package com.xiaobai.media.activity;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.view.View;
@@ -20,6 +22,7 @@ import com.xiaobai.media.bean.MediaFolder;
 import com.xiaobai.media.permission.imp.OnPermissionsResult;
 import com.xiaobai.media.resolver.MediaHelper;
 import com.xiaobai.media.weight.BaseRecyclerView;
+import com.xiaobai.media.weight.FolderPopupWindow;
 import com.xiaobai.media.weight.TitleView;
 import com.xiaobai.media.weight.Toasts;
 
@@ -39,6 +42,7 @@ public class MediaActivity extends ObjectActivity {
     private MediaSelector.MediaOption mMediaOption;
     private TitleView mTitleViewTop;
     public boolean isUp;
+    private List<MediaFolder> mAllMediaFolderData;
 
     @Override
     protected int getLayoutId() {
@@ -56,9 +60,11 @@ public class MediaActivity extends ObjectActivity {
     @Override
     protected void initData() {
         List<MediaFile> mMediaFileData = new ArrayList<>();
+        mAllMediaFolderData = new ArrayList<>();
         MediaFileAdapter mMediaFileAdapter = new MediaFileAdapter(mMediaOption.isShowCamera, mMediaFileData);
         mRvMediaFile.setAdapter(mMediaFileAdapter);
         MediaHelper.create(this).loadMediaResolver(mMediaOption.mediaType == MediaSelector.MediaOption.MEDIA_ALL, data -> {
+            mAllMediaFolderData.addAll(data);
             mMediaFileData.addAll(data.get(0).fileData);
             mMediaFileAdapter.notifyDataSetChanged();
         });
@@ -71,6 +77,7 @@ public class MediaActivity extends ObjectActivity {
             public void onCenterClick(@NonNull View view) {
                 isUp = !isUp;
                 showTitleViewCenterAnimation(isUp);
+
             }
         });
     }
@@ -107,7 +114,7 @@ public class MediaActivity extends ObjectActivity {
         }, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA);
 
     }
-
+    FolderPopupWindow folderPopupWindow;
     private void showTitleViewCenterAnimation(boolean isUp) {
         ObjectAnimator objectAnimator;
         if (isUp) {
@@ -120,6 +127,22 @@ public class MediaActivity extends ObjectActivity {
         objectAnimator.setRepeatCount(0);
         objectAnimator.setInterpolator(new DecelerateInterpolator());
         objectAnimator.start();
+
+        objectAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (folderPopupWindow==null){
+                    folderPopupWindow = new FolderPopupWindow(MediaActivity.this, mAllMediaFolderData);
+                }
+
+                if (isUp) {
+                    folderPopupWindow.showAsDropDown(mTitleViewTop);
+                } else {
+                    folderPopupWindow.dismiss();
+                }
+
+            }
+        });
     }
 
 }

@@ -43,6 +43,8 @@ public class MediaActivity extends ObjectActivity {
     private TitleView mTitleViewTop;
     public boolean isUp;
     private List<MediaFolder> mAllMediaFolderData;
+    private ObjectAnimator mFolderAnimator;
+    FolderPopupWindow folderPopupWindow;
 
     @Override
     protected int getLayoutId() {
@@ -61,7 +63,7 @@ public class MediaActivity extends ObjectActivity {
     protected void initData() {
         List<MediaFile> mMediaFileData = new ArrayList<>();
         mAllMediaFolderData = new ArrayList<>();
-        MediaFileAdapter mMediaFileAdapter = new MediaFileAdapter(mMediaOption.isShowCamera, mMediaFileData);
+        MediaFileAdapter mMediaFileAdapter = new MediaFileAdapter(this,mMediaOption.isShowCamera, mMediaFileData);
         mRvMediaFile.setAdapter(mMediaFileAdapter);
         MediaHelper.create(this).loadMediaResolver(mMediaOption.mediaType == MediaSelector.MediaOption.MEDIA_ALL, data -> {
             mAllMediaFolderData.addAll(data);
@@ -88,7 +90,7 @@ public class MediaActivity extends ObjectActivity {
         ArrayList mCheckMediaFileData = intent.getParcelableArrayListExtra(MediaSelector.KEY_MEDIA_DATA);
         mMediaOption = intent.getParcelableExtra(MediaSelector.KEY_MEDIA_OPTION);
         if (mMediaOption == null) {
-            mMediaOption = MediaSelector.MediaOption.getDefaultOption();
+            mMediaOption = MediaSelector.getDefaultOption();
         }
         requestPermissions();
 
@@ -114,35 +116,31 @@ public class MediaActivity extends ObjectActivity {
         }, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA);
 
     }
-    FolderPopupWindow folderPopupWindow;
+
     private void showTitleViewCenterAnimation(boolean isUp) {
-        ObjectAnimator objectAnimator;
+        if (mFolderAnimator !=null && mFolderAnimator.isRunning()){
+            mFolderAnimator.cancel();
+        }
         if (isUp) {
-            objectAnimator = ObjectAnimator.ofFloat(mTitleViewTop.mAivCenter, "rotation", 0f, 180f);
+            mFolderAnimator = ObjectAnimator.ofFloat(mTitleViewTop.mAivCenter, "rotation", 0f, 180f);
         } else {
-            objectAnimator = ObjectAnimator.ofFloat(mTitleViewTop.mAivCenter, "rotation", 180f, 360f);
+            mFolderAnimator = ObjectAnimator.ofFloat(mTitleViewTop.mAivCenter, "rotation", 180f, 360f);
         }
 
-        objectAnimator.setDuration(200);
-        objectAnimator.setRepeatCount(0);
-        objectAnimator.setInterpolator(new DecelerateInterpolator());
-        objectAnimator.start();
+        mFolderAnimator.setDuration(200);
+        mFolderAnimator.setRepeatCount(0);
+        mFolderAnimator.setInterpolator(new DecelerateInterpolator());
+        mFolderAnimator.start();
 
-        objectAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                if (folderPopupWindow==null){
-                    folderPopupWindow = new FolderPopupWindow(MediaActivity.this, mAllMediaFolderData);
-                }
+        if (folderPopupWindow==null){
+            folderPopupWindow = new FolderPopupWindow(MediaActivity.this, mAllMediaFolderData);
+        }
 
-                if (isUp) {
-                    folderPopupWindow.showAsDropDown(mTitleViewTop);
-                } else {
-                    folderPopupWindow.dismiss();
-                }
-
-            }
-        });
+        if (isUp) {
+            folderPopupWindow.showAsDropDown(mTitleViewTop);
+        } else {
+            folderPopupWindow.dismiss();
+        }
     }
 
 }

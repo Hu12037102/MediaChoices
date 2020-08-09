@@ -26,7 +26,7 @@ import java.util.List;
  * 更新时间: 2020/6/20 21:31
  * 描述:
  */
-public class MediaFileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolder, MediaFile> {
     private boolean mIsShowCamera;
     private List<MediaFile> mData;
     private static final int TYPE_CAMERA = 1;
@@ -43,7 +43,8 @@ public class MediaFileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     private OnClickMediaListener onClickMediaListener;
 
-    public MediaFileAdapter(boolean isShowCamera, List<MediaFile> data) {
+    public MediaFileAdapter(Context context, boolean isShowCamera, List<MediaFile> data) {
+        super(context, data);
         this.mIsShowCamera = isShowCamera;
         this.mData = data;
     }
@@ -57,20 +58,8 @@ public class MediaFileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
 
-    @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        if (viewType == MediaFileAdapter.TYPE_CAMERA) {
-            return new MediaCameraViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_media_camera_view, parent, false));
-        } else {
-            return new MediaFileViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_media_file_view, parent, false));
-        }
-
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        Log.w("onBindViewHolder--", mData.size() + "--");
+    protected void onBindViewDataHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof MediaCameraViewHolder) {
             MediaCameraViewHolder cameraViewHolder = (MediaCameraViewHolder) holder;
             int finalPosition = position;
@@ -94,17 +83,26 @@ public class MediaFileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             if (mediaFile.isCheck) {
                 fileViewHolder.mViewMask.setVisibility(View.VISIBLE);
                 // GlideManger.get(context).loadImage(context, R.mipmap.icon_media_check, fileViewHolder.mAivCheck);
-                fileViewHolder.mAivCheck.setImageResource(R.mipmap.icon_media_check);
+                fileViewHolder.mAtvCheck.setCompoundDrawablesWithIntrinsicBounds(R.mipmap.icon_media_check,0,0,0);
             } else {
                 fileViewHolder.mViewMask.setVisibility(View.GONE);
                 // GlideManger.get(context).loadImage(context, R.mipmap.icon_media_default, fileViewHolder.mAivCheck);
-                fileViewHolder.mAivCheck.setImageResource(R.mipmap.icon_media_default);
+                fileViewHolder.mAtvCheck.setCompoundDrawablesWithIntrinsicBounds(R.mipmap.icon_media_default,0,0,0);
             }
-            fileViewHolder.mAivCheck.setOnClickListener(v -> {
+            fileViewHolder.mAtvCheck.setOnClickListener(v -> {
 
             });
         }
+    }
 
+    @Override
+    protected RecyclerView.ViewHolder onCreateDataViewHolder(@NonNull ViewGroup parent, int viewType) {
+
+        if (viewType == MediaFileAdapter.TYPE_CAMERA) {
+            return new MediaCameraViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_media_camera_view, parent, false));
+        } else {
+            return new MediaFileViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_media_file_view, parent, false));
+        }
     }
 
 
@@ -116,7 +114,7 @@ public class MediaFileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     static class MediaFileViewHolder extends RecyclerView.ViewHolder {
         private View mViewMask;
         private RoundedImageView mRivMedia;
-        private AppCompatImageView mAivCheck;
+        private AppCompatTextView mAtvCheck;
         private AppCompatTextView mAtvVideoLength;
 
         public MediaFileViewHolder(@NonNull View itemView) {
@@ -127,7 +125,7 @@ public class MediaFileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         private void initView(View itemView) {
             MediaFileAdapter.setItemParams(itemView);
             mRivMedia = itemView.findViewById(R.id.riv_media);
-            mAivCheck = itemView.findViewById(R.id.aiv_media_check);
+            mAtvCheck = itemView.findViewById(R.id.atv_media_check);
             mAtvVideoLength = itemView.findViewById(R.id.atv_video_length);
             mViewMask = itemView.findViewById(R.id.view_mask);
 

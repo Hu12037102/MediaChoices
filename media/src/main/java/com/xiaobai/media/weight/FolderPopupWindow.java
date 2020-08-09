@@ -1,9 +1,12 @@
 package com.xiaobai.media.weight;
 
+import android.animation.ObjectAnimator;
+import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.BounceInterpolator;
 import android.widget.PopupWindow;
 
 import androidx.annotation.NonNull;
@@ -30,6 +33,7 @@ public class FolderPopupWindow {
     private List<MediaFolder> mData;
     private PopupWindow mPopupWindow;
     private BaseRecyclerView mRvContent;
+    private ObjectAnimator mFolderAnimation;
 
     public FolderPopupWindow(Context context, List<MediaFolder> data) {
         this.mContext = context;
@@ -39,7 +43,7 @@ public class FolderPopupWindow {
 
     public void init() {
         mPopupWindow = new PopupWindow(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        View inflateView = LayoutInflater.from(mContext).inflate(R.layout.item_popup_folder_view, null);
+        View  inflateView = LayoutInflater.from(mContext).inflate(R.layout.item_popup_folder_view, (ViewGroup) ((Activity)mContext).getWindow().getDecorView(),false);
         mPopupWindow.setContentView(inflateView);
         mRvContent = inflateView.findViewById(R.id.brv_folder);
         mRvContent.setLayoutManager(new LinearLayoutManager(mContext));
@@ -48,8 +52,9 @@ public class FolderPopupWindow {
         mPopupWindow.setBackgroundDrawable(ContextCompat.getDrawable(mContext, R.color.color80000000));
         mPopupWindow.setOutsideTouchable(false);
         mPopupWindow.setClippingEnabled(false);
-      // mPopupWindow.setTouchable(true);
+        // mPopupWindow.setTouchable(true);
         mPopupWindow.setFocusable(true);
+        mPopupWindow.setAnimationStyle(R.style.DefaultDialogAnimation);
 
     }
 
@@ -57,9 +62,25 @@ public class FolderPopupWindow {
        /*int height = ScreenUtils.screenHeight(mContext) - view.getHeight() - ScreenUtils.dp2px(mContext, 120);
         mPopupWindow.setHeight(height);*/
         mPopupWindow.showAsDropDown(view);
+      //  folderAnimation(true);
     }
 
     public void dismiss() {
-        mPopupWindow.dismiss();
+        folderAnimation(false);
+        //mPopupWindow.dismiss();
+    }
+
+    public void folderAnimation(boolean isShow) {
+        if (mFolderAnimation != null && mFolderAnimation.isRunning()) {
+            mFolderAnimation.cancel();
+        }
+        if (isShow) {
+            mFolderAnimation = ObjectAnimator.ofFloat(mRvContent, "translationY", mRvContent.getTranslationY(), mRvContent.getHeight());
+        } else {
+            mFolderAnimation = ObjectAnimator.ofFloat(mRvContent, "translationY", mRvContent.getHeight(), 0);
+        }
+        mFolderAnimation.setDuration(300);
+        mFolderAnimation.setInterpolator(new BounceInterpolator());
+        mFolderAnimation.start();
     }
 }

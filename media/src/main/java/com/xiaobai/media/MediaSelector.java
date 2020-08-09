@@ -21,7 +21,7 @@ import java.util.ArrayList;
  * 描述:
  */
 public class MediaSelector {
-    private MediaOption mOption = MediaOption.getDefaultOption();
+    private MediaOption mOption = MediaSelector.getDefaultOption();
     private ArrayList<MediaFile> mSelectorMediaFileData;
     private WeakReference<Fragment> mSoftFragment;
     private WeakReference<Activity> mSoftActivity;
@@ -86,6 +86,7 @@ public class MediaSelector {
         public int maxSelectorMedia = R.integer.max_choose_media;
         public boolean isCompress;
         public boolean isShowCamera;
+        //是不是选择单一类型
         public boolean isSelectorMultiple;
         public boolean isCrop;
         public int cropScaleX = 1;
@@ -93,6 +94,8 @@ public class MediaSelector {
         public int cropWidth = 720;
         public int cropSHeight = 720;
         public int mediaType = MediaOption.MEDIA_IMAGE;
+        public ArrayList<MediaFile> selectorFileData;
+
 
         protected MediaOption(Parcel in) {
             maxSelectorMedia = in.readInt();
@@ -105,6 +108,7 @@ public class MediaSelector {
             cropWidth = in.readInt();
             cropSHeight = in.readInt();
             mediaType = in.readInt();
+            selectorFileData = in.createTypedArrayList(MediaFile.CREATOR);
         }
 
         public static final Creator<MediaOption> CREATOR = new Creator<MediaOption>() {
@@ -119,9 +123,6 @@ public class MediaSelector {
             }
         };
 
-        public synchronized static MediaOption getDefaultOption() {
-            return new MediaOption();
-        }
 
         @Override
         public int describeContents() {
@@ -140,7 +141,12 @@ public class MediaSelector {
             dest.writeInt(cropWidth);
             dest.writeInt(cropSHeight);
             dest.writeInt(mediaType);
+            dest.writeTypedList(selectorFileData);
         }
+    }
+
+    public static MediaOption getDefaultOption() {
+        return new MediaOption();
     }
 
 }

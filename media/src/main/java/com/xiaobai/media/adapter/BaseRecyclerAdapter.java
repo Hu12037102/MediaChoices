@@ -12,7 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.recyclerview.widget.RecyclerView;
 
-
 import com.xiaobai.media.R;
 
 import java.util.List;
@@ -27,9 +26,8 @@ import java.util.List;
  *
  * @author ：
  */
-public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D extends List> extends RecyclerView.Adapter<VH> {
-    protected D mData;
-    private boolean mIsHasNet = true;
+public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, T> extends RecyclerView.Adapter<VH> {
+    protected List<T> mData;
     private static final int TYPE_NOT_NET = 100;
     private static final int TYPE_NOT_DATA = 101;
     private static final int TYPE_HEAD_VIEW = 102;
@@ -41,12 +39,11 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
     private int mNotDataContentRes = R.string.not_data;
     private View mHeadView;
     private View mFootView;
-    private View mNotMoreView;
     protected boolean isHaveHeadView;
     protected boolean isHaveFootView;
-    private boolean isHaveNotMoreView;
     private int mAllDataCount;
     protected Context mContext;
+
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
         this.onItemClickListener = onItemClickListener;
@@ -92,73 +89,34 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
         }
     }
 
-    public void addNotMoreView(@NonNull View view) {
-        this.isHaveNotMoreView = true;
-        this.mNotMoreView = view;
-    }
 
-    public void removeNotMoreView() {
-        if (isHaveNotMoreView) {
-            isHaveNotMoreView = false;
-        }
-    }
-
-    public BaseRecyclerAdapter(@NonNull D data) {
+    public BaseRecyclerAdapter(@NonNull Context context, @NonNull List<T> data) {
+        this.mContext = context;
         this.mData = data;
-    }
-
-
-    public void notifyData(boolean isHasNet) {
-        this.mIsHasNet = isHasNet;
-        this.notifyDataSetChanged();
-
     }
 
 
     @Override
     public int getItemViewType(int position) {
-        if (mData != null && mData.size() > 0) {
-            if (isHaveHeadView && position == 0) {
-                return TYPE_HEAD_VIEW;
-            } else if (isHaveNotMoreView && position == mAllDataCount - 1) {
-                return TYPE_NOT_MORE;
-            } else if (isHaveFootView) {
-                if (isHaveNotMoreView && position == mAllDataCount - 2) {
-                    return TYPE_FOOT_VIEW;
-                } else if (!isHaveNotMoreView && position == mAllDataCount - 1) {
-                    return TYPE_FOOT_VIEW;
-                }
-            }
-        } else {
-            if (isHaveHeadView && position == 0) {
-                return TYPE_HEAD_VIEW;
-            } else if (isHaveNotMoreView && position == mAllDataCount - 1) {
-                return TYPE_NOT_MORE;
-            } else if (isHaveFootView) {
-                if (isHaveNotMoreView && position == mAllDataCount - 2) {
-                    return TYPE_FOOT_VIEW;
-                } else if (!isHaveNotMoreView && position == mAllDataCount - 1) {
-                    return TYPE_FOOT_VIEW;
-                } else if (mIsHasNet) {
-                    return TYPE_NOT_DATA;
-                } else {
-                    return TYPE_NOT_NET;
-                }
-            } else if (mIsHasNet) {
-                return TYPE_NOT_DATA;
-            } else {
-                return TYPE_NOT_NET;
-            }
-
+        if (position == 0 && isHaveHeadView) {
+            return TYPE_HEAD_VIEW;
+        } else if (position == mAllDataCount - 1 && isHaveFootView) {
+            return TYPE_FOOT_VIEW;
+        } else if (mData.size() == 0) {
+            return TYPE_NOT_DATA;
         }
         return super.getItemViewType(position);
+
     }
 
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
 
     @NonNull
     @Override
     public VH onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        mContext = viewGroup.getContext();
         RecyclerView.ViewHolder viewHolder;
         switch (i) {
             case TYPE_NOT_NET:
@@ -173,10 +131,6 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
                 break;
             case TYPE_FOOT_VIEW:
                 viewHolder = new RecyclerView.ViewHolder(mFootView) {
-                };
-                break;
-            case TYPE_NOT_MORE:
-                viewHolder = new RecyclerView.ViewHolder(mNotMoreView) {
                 };
                 break;
             default:
@@ -219,22 +173,14 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
             }
             onBindViewDataHolder(viewHolder, i);
             int finalI = i;
-            viewHolder.itemView.setOnClickListener(v -> {
+            viewHolder.itemView.setOnClickListener(view -> {
                 if (onItemClickListener != null) {
-                    onItemClickListener.onItemClick(v, finalI);
-                }
-            });
-            viewHolder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    if (onItemClickListener!=null){
-                        onItemClickListener.onItemLongClick(v,finalI);
-                    }
-                    return false;
+                    onItemClickListener.onItemClick(view, finalI);
                 }
             });
         }
     }
+
 
     protected abstract void onBindViewDataHolder(@NonNull VH viewHolder, int i);
 
@@ -242,20 +188,16 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
 
     @Override
     public int getItemCount() {
-        int i = 0;
+        mAllDataCount = mData == null ? 0 : mData.size();
+        if (mData == null || mData.size() == 0) {
+            mAllDataCount = mAllDataCount + 1;
+
+        }
         if (isHaveHeadView) {
-            i++;
+            mAllDataCount += 1;
         }
         if (isHaveFootView) {
-            i++;
-        }
-        if (isHaveNotMoreView) {
-            i++;
-        }
-        if (mData == null || mData.size() == 0) {
-            mAllDataCount = i + 1;
-        } else {
-            mAllDataCount = mData.size() + i;
+            mAllDataCount += 1;
         }
         return mAllDataCount;
     }
@@ -300,13 +242,107 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
     }
 
     public interface OnItemClickListener {
-        void onNotNetClick(View view);
+        default void onNotNetClick(View view) {
+        }
 
-        void onNotDataClick(View view);
+        ;
 
-        void onItemClick(View view, int position);
+        default void onNotDataClick(View view) {
+        }
 
-        default void onItemLongClick(@NonNull View view, int position) {
+        ;
+
+        default void onItemClick(View view, int position) {
+        }
+
+        ;
+
+        default void onItemLongClick(View view, int position) {
+        }
+
+    }
+
+    public void notifyBaseItemInserted(T t, int position) {
+        if (t == null) {
+            return;
+        }
+        mData.add(position, t);
+        if (isHaveHeadView) {
+          //  notifyItemInserted(position + 1);
+           // notifyItemRangeChanged(position + 1, mAllDataCount);
+            notifyDataSetChanged();
+        } else {
+            notifyItemInserted(position);
         }
     }
+
+    public void notifyBaseItemInserted(T t) {
+        if (t == null) {
+            return;
+        }
+        mData.add(t);
+        if (isHaveHeadView) {
+         //   notifyItemInserted(mData.size());
+           // notifyItemRangeChanged(mData.size(), mAllDataCount);
+            notifyDataSetChanged();
+        } else {
+            notifyItemInserted(mData.size() - 1);
+        }
+
+    }
+
+
+    public void notifyAllDataChanged(T t) {
+        mData.add(t);
+        notifyDataSetChanged();
+    }
+
+    public void notifyAllDataChanged(List<T> data) {
+        notifyAllDataChanged(data, false);
+    }
+
+    public void notifyAllDataChanged(List<T> data, boolean isRefresh) {
+        if (isRefresh) {
+            mData.clear();
+        }
+        if (data != null && data.size() > 0) {
+            mData.addAll(data);
+        }
+        notifyDataSetChanged();
+    }
+
+
+    public void notifyBaseItemRemoved(int position) {
+        mData.remove(position);
+        if (isHaveHeadView) {
+            notifyItemRemoved(position + 1);
+        } else {
+            notifyItemRemoved(position);
+        }
+
+    }
+
+    public void notifyBaseItemRemoved(T t) {
+        int i = mData.indexOf(t);
+        if (i < 0) {
+            return;
+        }
+        mData.remove(t);
+        if (isHaveHeadView) {
+            notifyItemRemoved(i + 1);
+        } else {
+            notifyItemRemoved(i);
+        }
+
+
+    }
+
+    public void notifyBaseItemChanged(int position) {
+        if (isHaveHeadView) {
+            this.notifyItemChanged(position + 1);
+        } else {
+            this.notifyItemChanged(position);
+        }
+    }
+
 }

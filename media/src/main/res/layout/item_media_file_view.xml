@@ -14,8 +14,8 @@
     tools:background="@mipmap/icon_media_image_placeholder"
     tools:src="@mipmap/icon_media_image_placeholder"
     />
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/aiv_media_check"
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/atv_media_check"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@mipmap/icon_media_default"

@@ -82,7 +82,7 @@ public class GlideManger {
     }
 
     public void loadImage(@NonNull Context context, @NonNull Object obj, @NonNull ImageView imageView, @DrawableRes int placeholderRes, @DrawableRes int errorRes) {
-        RequestBuilder<Drawable> glideRequest = Glide.with(context).asDrawable();
+        /*RequestBuilder<Drawable> glideRequest = Glide.with(context).asDrawable();
         if (obj instanceof String) {
             String url = (String) obj;
             glideRequest = glideRequest.load(url);
@@ -101,7 +101,8 @@ public class GlideManger {
         } else {
             return;
         }
-        glideRequest.placeholder(placeholderRes).error(errorRes).into(imageView);
+        glideRequest.placeholder(placeholderRes).error(errorRes).into(imageView);*/
+        Glide.with(context).load(obj).placeholder(placeholderRes).error(errorRes).into(imageView);
     }
 
     public void loadImage(@NonNull Context context, @NonNull Object obj, @NonNull ImageView imageView) {

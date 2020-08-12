@@ -7,6 +7,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -79,6 +80,7 @@ public class MediaHelper {
                 if (!FileUtils.existsImageFile(mediaFile.filePath) && !FileUtils.existsVideoFile(mediaFile.filePath)) {
                     continue;
                 }
+                Log.w("loadMediaResolver--",mediaFile.filePath);
                 boolean isVideo = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE)) == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
 
                 if (isVideo) {

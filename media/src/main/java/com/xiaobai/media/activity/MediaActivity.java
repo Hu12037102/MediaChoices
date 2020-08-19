@@ -3,6 +3,8 @@ package com.xiaobai.media.activity;
 import android.Manifest;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Parcelable;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 
@@ -12,9 +14,11 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import com.xiaobai.media.MediaSelector;
 import com.xiaobai.media.OnLoadMediaCallback;
 import com.xiaobai.media.R;
+import com.xiaobai.media.adapter.BaseRecyclerAdapter;
 import com.xiaobai.media.adapter.MediaFileAdapter;
 import com.xiaobai.media.bean.MediaFile;
 import com.xiaobai.media.bean.MediaFolder;
+import com.xiaobai.media.manger.ParcelableManger;
 import com.xiaobai.media.permission.imp.OnPermissionsResult;
 import com.xiaobai.media.resolver.MediaHelper;
 import com.xiaobai.media.utils.DataUtils;
@@ -40,7 +44,6 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
     private TitleView mTitleViewTop;
     public boolean isUp;
     private List<MediaFolder> mAllMediaFolderData;
-    private ObjectAnimator mFolderAnimator;
     FolderPopupWindow mFolderPopupWindow;
     private List<MediaFile> mMediaFileData;
     private MediaFileAdapter mMediaFileAdapter;
@@ -98,7 +101,7 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
 
         mMediaFileData = new ArrayList<>();
         mAllMediaFolderData = new ArrayList<>();
-        mMediaFileAdapter = new MediaFileAdapter(this, mMediaOption.isShowCamera, mMediaFileData, mCheckMediaData);
+        mMediaFileAdapter = new MediaFileAdapter(this, mMediaOption, mMediaFileData, mCheckMediaData);
         mMediaFileAdapter.setHasStableIds(true);
         mRvMediaFile.setAdapter(mMediaFileAdapter);
         MediaHelper.create(this).loadMediaResolver(mMediaOption, this);
@@ -112,6 +115,21 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
                 notifyFolderWindow();
             }
         });
+        mMediaFileAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                startToPreview(position);
+            }
+        });
+    }
+
+    private void startToPreview(int position) {
+        ParcelableManger manger = ParcelableManger.get();
+        manger.putData(mMediaFileData);
+        Intent intent = new Intent(this,PreviewActivity.class);
+        intent.putParcelableArrayListExtra(ObjectActivity.KEY_PARCELABLE_CHECK_DATA, (ArrayList<? extends Parcelable>) mCheckMediaData);
+        intent.putExtra(ObjectActivity.KEY_INDEX_CHECK_POSITION, position);
+        startActivity(intent);
     }
 
     private void notifyFolderWindow() {
@@ -127,6 +145,7 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
                     mMediaFileData.clear();
                     mMediaFileData.addAll(folders.fileData);
                     mMediaFileAdapter.notifyDataSetChanged();
+                    mTitleViewTop.mTvCenter.setText(folders.folderName);
                 }
 
                 @Override

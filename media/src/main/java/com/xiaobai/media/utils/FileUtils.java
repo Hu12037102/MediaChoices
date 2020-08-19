@@ -83,7 +83,6 @@ public class FileUtils {
     public static boolean isImageMinType(String path) {
         return !DataUtils.isEmpty(path) && FileUtils.existsFile(path) && getFileMinType(path).startsWith("image/");
     }
-
     /**
      * 获取时间长度
      *

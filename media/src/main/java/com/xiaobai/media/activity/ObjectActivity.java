@@ -21,13 +21,15 @@ import com.xiaobai.media.permission.PermissionActivity;
  * 描述:
  */
 public abstract class ObjectActivity extends PermissionActivity {
+    public static final String KEY_PARCELABLE_CHECK_DATA = "key_parcelable_check_data";
+    public static final String KEY_INDEX_CHECK_POSITION = "key_index_check_position";
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(getLayoutId());
         initStatusBar();
         initPermission();
-
     }
 
     protected void initStatusBar() {

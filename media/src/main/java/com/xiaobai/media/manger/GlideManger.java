@@ -19,6 +19,7 @@ import com.bumptech.glide.load.engine.cache.LruResourceCache;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
 import com.xiaobai.media.R;
 
 import java.io.File;
@@ -82,18 +83,28 @@ public class GlideManger {
         Glide.init(mApplicationContext, builder);
         // Glide.init(UIUtils.getBaseContext(), );
     }
+
     public void loadImage(Object o, ImageView imageView) {
         if (o == null || imageView == null) {
             return;
         }
         Glide.with(imageView).load(o).placeholder(R.color.colorPlaceholder).error(R.color.colorError).into(imageView);
     }
+
     public void loadRoundImage(Object o, ImageView imageView, int radius) {
         if (o == null || imageView == null) {
             return;
         }
         Glide.with(imageView.getContext()).load(o).apply(createRoundedRequestOptions(radius)).placeholder(R.drawable.shape_placeholder_error_radous_view).error(R.drawable.shape_placeholder_error_radous_view).into(imageView);
     }
+
+    public void loadPreviewImage(Object o, ImageView imageView) {
+        if (o == null || imageView == null) {
+            return;
+        }
+        Glide.with(imageView).load(o).placeholder(R.color.colorPlaceholder).error(R.color.colorError).centerInside().override(imageView.getContext().getResources().getDisplayMetrics().widthPixels, Target.SIZE_ORIGINAL).into(imageView);
+    }
+
     private RequestOptions createRoundedRequestOptions(int radius) {
         return new RequestOptions()
                 .transform(new CenterCrop(), new RoundedCorners(radius));

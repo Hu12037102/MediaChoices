@@ -7,11 +7,11 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.xiaobai.media.MediaSelector;
 import com.xiaobai.media.R;
 import com.xiaobai.media.activity.MediaActivity;
 import com.xiaobai.media.bean.MediaFile;
@@ -19,6 +19,7 @@ import com.xiaobai.media.manger.GlideManger;
 import com.xiaobai.media.utils.DataUtils;
 import com.xiaobai.media.utils.FileUtils;
 import com.xiaobai.media.utils.ScreenUtils;
+import com.xiaobai.media.weight.Toasts;
 
 import java.util.List;
 
@@ -29,7 +30,7 @@ import java.util.List;
  * 描述:
  */
 public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolder, MediaFile> {
-    private boolean mIsShowCamera;
+    private MediaSelector.MediaOption mOption;
     private List<MediaFile> mData;
     private static final int TYPE_CAMERA = 1;
     private List<MediaFile> mCheckMediaData;
@@ -46,16 +47,16 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
 
     private OnClickMediaListener onClickMediaListener;
 
-    public MediaFileAdapter(Context context, boolean isShowCamera, List<MediaFile> data, List<MediaFile> checkMediaData) {
+    public MediaFileAdapter(Context context, MediaSelector.MediaOption option, List<MediaFile> data, List<MediaFile> checkMediaData) {
         super(context, data);
-        this.mIsShowCamera = isShowCamera;
+        this.mOption = option;
         this.mData = data;
         this.mCheckMediaData = checkMediaData;
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (mIsShowCamera && position == 0) {
+        if (mOption.isShowCamera && position == 0) {
             return MediaFileAdapter.TYPE_CAMERA;
         }
         return super.getItemViewType(position);
@@ -77,7 +78,7 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
             });
 
         } else if (holder instanceof MediaFileViewHolder) {
-            if (mIsShowCamera) {
+            if (mOption.isShowCamera) {
                 position -= 1;
             }
             Context context = holder.itemView.getContext();
@@ -93,6 +94,7 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
             } else if (FileUtils.isGifMinType(mediaFile.filePath)) {
                 fileViewHolder.mAtvMediaType.setVisibility(View.VISIBLE);
                 fileViewHolder.mAtvMediaType.setCompoundDrawablesWithIntrinsicBounds(R.mipmap.icon_media_gif, 0, 0, 0);
+                fileViewHolder.mAtvMediaType.setText(null);
             } else {
                 fileViewHolder.mAtvMediaType.setVisibility(View.GONE);
             }
@@ -102,14 +104,30 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
                 if (mCheckMediaData.contains(mediaFile)) {
                     mCheckMediaData.remove(mediaFile);
                 } else {
+                    if (DataUtils.getListSize(mCheckMediaData) >= mOption.maxSelectorMediaCount) {
+                        Toasts.showToast(mContext.getApplicationContext(), R.string.max_selector_media_count, mOption.maxSelectorMediaCount);
+                        return;
+                    } else if (!mOption.isSelectorMultiple && DataUtils.getListSize(mCheckMediaData) >= 1) {
+                        MediaFile checkMedia = mCheckMediaData.get(0);
+                        if (mediaFile.mediaType != checkMedia.mediaType) {
+                            Toasts.showToast(mContext, R.string.not_selector_video_and_image);
+                            return;
+                        } else if (checkMedia.mediaType == MediaFile.TYPE_VIDEO && DataUtils.getListSize(mCheckMediaData) >= mOption.maxSelectorVideoCount) {
+                            Toasts.showToast(mContext, R.string.max_selector_video_count, mOption.maxSelectorVideoCount);
+                            return;
+                        }
+
+                    }
                     mCheckMediaData.add(mediaFile);
                 }
-              notifyDataSetChanged();
+                notifyDataSetChanged();
             });
+
         }
     }
 
     private void updateCheckMedia(@NonNull MediaFile mediaFile, @NonNull MediaFileViewHolder fileViewHolder) {
+
         if (mCheckMediaData.contains(mediaFile)) {
             fileViewHolder.mAtvCheck.setBackgroundResource(R.drawable.shape_check_media_count_view);
             fileViewHolder.mAtvCheck.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
@@ -137,7 +155,7 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
 
     @Override
     public int getItemCount() {
-        return mData == null ? 0 : mIsShowCamera ? mData.size() + 1 : mData.size();
+        return mData == null ? 0 : mOption.isShowCamera ? mData.size() + 1 : mData.size();
     }
 
     static class MediaFileViewHolder extends RecyclerView.ViewHolder {
@@ -183,8 +201,7 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
     public interface OnClickMediaListener {
         void onClickMedia(@NonNull View view, int position);
 
-        default void onCheckMedia(@NonNull View view, int position, boolean isCheck) {
-        }
+
     }
 
     public static void setItemParams(@NonNull View itemView) {

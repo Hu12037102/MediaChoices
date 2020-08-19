@@ -12,7 +12,11 @@
     tools:background="@mipmap/icon_media_image_placeholder"
     tools:src="@mipmap/icon_media_image_placeholder"
     />
-
+    <View
+        android:id="@+id/view_mask"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/atv_type"
@@ -30,11 +34,7 @@
         android:visibility="visible"
         />
 
-    <View
-        android:id="@+id/view_mask"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+
     <FrameLayout
         android:id="@+id/fl_check"
         android:layout_width="wrap_content"

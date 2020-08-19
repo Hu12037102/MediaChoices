@@ -24,6 +24,8 @@ public class MediaSelector {
     private MediaOption mOption = MediaSelector.getDefaultOption();
     private WeakReference<Fragment> mSoftFragment;
     private WeakReference<Activity> mSoftActivity;
+    private static final int SELECTOR_MAX_MEDIA_COUNT = 9;
+    private static final int SELECTOR_MAX_VIDEO_COUNT = 1;
 
     public static final String KEY_MEDIA_OPTION = "key_media_option";
     public static final int REQUEST_CODE_MEDIA = 2080;
@@ -77,10 +79,10 @@ public class MediaSelector {
         public MediaOption() {
         }
 
-        public int maxSelectorMedia = R.integer.max_choose_media;
+        public int maxSelectorMediaCount = MediaSelector.SELECTOR_MAX_MEDIA_COUNT;
         public boolean isCompress;
         public boolean isShowCamera;
-        //是不是选择单一类型
+        //是不是选择多个
         public boolean isSelectorMultiple;
         public boolean isCrop;
         public int cropScaleX = 1;
@@ -89,10 +91,10 @@ public class MediaSelector {
         public int cropSHeight = 720;
         public int mediaType = MediaOption.MEDIA_ALL;
         public ArrayList<MediaFile> selectorFileData = new ArrayList<>();
-
+        public int maxSelectorVideoCount = MediaSelector.SELECTOR_MAX_VIDEO_COUNT;
 
         protected MediaOption(Parcel in) {
-            maxSelectorMedia = in.readInt();
+            maxSelectorMediaCount = in.readInt();
             isCompress = in.readByte() != 0;
             isShowCamera = in.readByte() != 0;
             isSelectorMultiple = in.readByte() != 0;
@@ -125,7 +127,7 @@ public class MediaSelector {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(maxSelectorMedia);
+            dest.writeInt(maxSelectorMediaCount);
             dest.writeByte((byte) (isCompress ? 1 : 0));
             dest.writeByte((byte) (isShowCamera ? 1 : 0));
             dest.writeByte((byte) (isSelectorMultiple ? 1 : 0));

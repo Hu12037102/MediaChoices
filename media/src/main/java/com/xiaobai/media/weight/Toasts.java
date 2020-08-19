@@ -25,6 +25,12 @@ public class Toasts {
         Toast.makeText(context, resString, Toast.LENGTH_SHORT).show();
     }
 
+    public static void showToast(@NonNull Context context, @StringRes int resString, Object obj) {
+        context = context.getApplicationContext();
+        Toast.makeText(context, context.getString(resString, obj), Toast.LENGTH_SHORT).show();
+    }
+
+
     public static void showToast(@NonNull Context context, @NonNull String text) {
         if (TextUtils.isEmpty(text)) {
             return;

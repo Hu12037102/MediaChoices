@@ -53,7 +53,7 @@ public class MediaFolderAdapter extends RecyclerView.Adapter<MediaFolderAdapter.
         holder.itemView.setOnClickListener(v -> {
             if (!mediaFolder.isCheck) {
                 for (int i = 0; i < mData.size(); i++) {
-                    mediaFolder.isCheck = i == position;
+                    mData.get(i).isCheck = i == position;
                 }
                 if (onFolderClickListener != null) {
                     onFolderClickListener.onClickUpdate(v, position);

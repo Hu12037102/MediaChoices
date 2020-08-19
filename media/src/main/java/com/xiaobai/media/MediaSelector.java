@@ -22,12 +22,10 @@ import java.util.ArrayList;
  */
 public class MediaSelector {
     private MediaOption mOption = MediaSelector.getDefaultOption();
-    private ArrayList<MediaFile> mSelectorMediaFileData;
     private WeakReference<Fragment> mSoftFragment;
     private WeakReference<Activity> mSoftActivity;
 
     public static final String KEY_MEDIA_OPTION = "key_media_option";
-    public static final String KEY_MEDIA_DATA = "key_media_data";
     public static final int REQUEST_CODE_MEDIA = 2080;
 
     private MediaSelector(@NonNull Fragment fragment) {
@@ -51,34 +49,30 @@ public class MediaSelector {
         return this;
     }
 
-    public MediaSelector buildMediaSelectorData(ArrayList<MediaFile> selectorMediaFileData) {
-        this.mSelectorMediaFileData = selectorMediaFileData;
-        if (mSelectorMediaFileData == null) {
-            mSelectorMediaFileData = new ArrayList<>();
-        }
-        return this;
-    }
 
     public void openActivity() {
         if (mSoftActivity.get() != null) {
             Activity activity = mSoftActivity.get();
             Intent intent = new Intent(activity, MediaActivity.class);
             intent.putExtra(MediaSelector.KEY_MEDIA_OPTION, mOption);
-            intent.putExtra(MediaSelector.KEY_MEDIA_DATA, mSelectorMediaFileData);
             activity.startActivityForResult(intent, MediaSelector.REQUEST_CODE_MEDIA);
         } else if (mSoftFragment.get() != null) {
             Fragment fragment = mSoftFragment.get();
             Intent intent = new Intent(fragment.getContext(), MediaActivity.class);
             intent.putExtra(MediaSelector.KEY_MEDIA_OPTION, mOption);
-            intent.putExtra(MediaSelector.KEY_MEDIA_DATA, mSelectorMediaFileData);
             fragment.startActivityForResult(intent, MediaSelector.REQUEST_CODE_MEDIA);
         }
     }
 
     public static class MediaOption implements Parcelable {
+        //所有媒体类型（图片、视频、gif）
         public static final int MEDIA_ALL = 0;
+        //所有图片类型（静态图片、gif）
         public static final int MEDIA_IMAGE = 1;
-        public static final int MEDIA_VIDEO = 2;
+        //静态图片类型（不包括gif）
+        public static final int MEDIA_IMAGE_STATIC = 2;
+        //所有的视频类型
+        public static final int MEDIA_VIDEO = 3;
 
         public MediaOption() {
         }
@@ -93,8 +87,8 @@ public class MediaSelector {
         public int cropScaleY = 1;
         public int cropWidth = 720;
         public int cropSHeight = 720;
-        public int mediaType = MediaOption.MEDIA_IMAGE;
-        public ArrayList<MediaFile> selectorFileData;
+        public int mediaType = MediaOption.MEDIA_ALL;
+        public ArrayList<MediaFile> selectorFileData = new ArrayList<>();
 
 
         protected MediaOption(Parcel in) {

@@ -13,7 +13,7 @@ public class MediaFile implements Parcelable {
     public int height;
     public String parentName;
     public String parentPath;
-    public boolean isCheck;
+   // public boolean isCheck;
     public long fileDuration;
     public int mediaType;
     public MediaFile(){}
@@ -26,7 +26,7 @@ public class MediaFile implements Parcelable {
         height = in.readInt();
         parentName = in.readString();
         parentPath = in.readString();
-        isCheck = in.readByte() != 0;
+       // isCheck = in.readByte() != 0;
         fileDuration = in.readLong();
         mediaType = in.readInt();
     }
@@ -69,7 +69,7 @@ public class MediaFile implements Parcelable {
         dest.writeInt(height);
         dest.writeString(parentName);
         dest.writeString(parentPath);
-        dest.writeByte((byte) (isCheck ? 1 : 0));
+        //dest.writeByte((byte) (isCheck ? 1 : 0));
         dest.writeLong(fileDuration);
         dest.writeInt(mediaType);
     }

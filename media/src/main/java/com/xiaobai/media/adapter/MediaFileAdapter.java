@@ -1,21 +1,23 @@
 package com.xiaobai.media.adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.makeramen.roundedimageview.RoundedImageView;
 import com.xiaobai.media.R;
 import com.xiaobai.media.activity.MediaActivity;
 import com.xiaobai.media.bean.MediaFile;
 import com.xiaobai.media.manger.GlideManger;
+import com.xiaobai.media.utils.DataUtils;
+import com.xiaobai.media.utils.FileUtils;
 import com.xiaobai.media.utils.ScreenUtils;
 
 import java.util.List;
@@ -30,6 +32,7 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
     private boolean mIsShowCamera;
     private List<MediaFile> mData;
     private static final int TYPE_CAMERA = 1;
+    private List<MediaFile> mCheckMediaData;
 
     public void setOnClickCameraListener(OnClickCameraListener onClickCameraListener) {
         this.onClickCameraListener = onClickCameraListener;
@@ -43,10 +46,11 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
 
     private OnClickMediaListener onClickMediaListener;
 
-    public MediaFileAdapter(Context context, boolean isShowCamera, List<MediaFile> data) {
+    public MediaFileAdapter(Context context, boolean isShowCamera, List<MediaFile> data, List<MediaFile> checkMediaData) {
         super(context, data);
         this.mIsShowCamera = isShowCamera;
         this.mData = data;
+        this.mCheckMediaData = checkMediaData;
     }
 
     @Override
@@ -79,20 +83,45 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
             Context context = holder.itemView.getContext();
             MediaFileViewHolder fileViewHolder = (MediaFileViewHolder) holder;
             MediaFile mediaFile = mData.get(position);
-            GlideManger.get(context).loadMediaImage(context, mediaFile.filePath, fileViewHolder.mRivMedia);
-            if (mediaFile.isCheck) {
-                fileViewHolder.mViewMask.setVisibility(View.VISIBLE);
-                // GlideManger.get(context).loadImage(context, R.mipmap.icon_media_check, fileViewHolder.mAivCheck);
-                fileViewHolder.mAtvCheck.setCompoundDrawablesWithIntrinsicBounds(R.mipmap.icon_media_check,0,0,0);
-            } else {
-                fileViewHolder.mViewMask.setVisibility(View.GONE);
-                // GlideManger.get(context).loadImage(context, R.mipmap.icon_media_default, fileViewHolder.mAivCheck);
-                fileViewHolder.mAtvCheck.setCompoundDrawablesWithIntrinsicBounds(R.mipmap.icon_media_default,0,0,0);
-            }
-            fileViewHolder.mAtvCheck.setOnClickListener(v -> {
 
+            GlideManger.get(context).loadRoundImage(mediaFile.filePath, fileViewHolder.mAivMedia, ScreenUtils.dp2px(holder.itemView.getContext(), 5));
+            updateCheckMedia(mediaFile, fileViewHolder);
+            if (FileUtils.isVideoMinType(mediaFile.filePath)) {
+                fileViewHolder.mAtvMediaType.setVisibility(View.VISIBLE);
+                fileViewHolder.mAtvMediaType.setCompoundDrawablesWithIntrinsicBounds(R.mipmap.icon_media_video, 0, 0, 0);
+                fileViewHolder.mAtvMediaType.setText(FileUtils.videoDuration(mediaFile.fileDuration));
+            } else if (FileUtils.isGifMinType(mediaFile.filePath)) {
+                fileViewHolder.mAtvMediaType.setVisibility(View.VISIBLE);
+                fileViewHolder.mAtvMediaType.setCompoundDrawablesWithIntrinsicBounds(R.mipmap.icon_media_gif, 0, 0, 0);
+            } else {
+                fileViewHolder.mAtvMediaType.setVisibility(View.GONE);
+            }
+
+
+            fileViewHolder.mFlCheck.setOnClickListener(v -> {
+                if (mCheckMediaData.contains(mediaFile)) {
+                    mCheckMediaData.remove(mediaFile);
+                } else {
+                    mCheckMediaData.add(mediaFile);
+                }
+              notifyDataSetChanged();
             });
         }
+    }
+
+    private void updateCheckMedia(@NonNull MediaFile mediaFile, @NonNull MediaFileViewHolder fileViewHolder) {
+        if (mCheckMediaData.contains(mediaFile)) {
+            fileViewHolder.mAtvCheck.setBackgroundResource(R.drawable.shape_check_media_count_view);
+            fileViewHolder.mAtvCheck.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+            fileViewHolder.mViewMask.setBackgroundResource(R.drawable.shape_media_mask_check_view);
+            fileViewHolder.mAtvCheck.setText(String.valueOf(mCheckMediaData.indexOf(mediaFile) + 1));
+        } else {
+            fileViewHolder.mViewMask.setBackgroundResource(R.drawable.shape_media_mask_default_view);
+            fileViewHolder.mAtvCheck.setCompoundDrawablesWithIntrinsicBounds(R.mipmap.icon_media_default, 0, 0, 0);
+            fileViewHolder.mAtvCheck.setBackgroundResource(0);
+            fileViewHolder.mAtvCheck.setText(null);
+        }
+
     }
 
     @Override
@@ -113,9 +142,10 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
 
     static class MediaFileViewHolder extends RecyclerView.ViewHolder {
         private View mViewMask;
-        private RoundedImageView mRivMedia;
+        private AppCompatImageView mAivMedia;
         private AppCompatTextView mAtvCheck;
-        private AppCompatTextView mAtvVideoLength;
+        private AppCompatTextView mAtvMediaType;
+        private FrameLayout mFlCheck;
 
         public MediaFileViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -124,10 +154,11 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
 
         private void initView(View itemView) {
             MediaFileAdapter.setItemParams(itemView);
-            mRivMedia = itemView.findViewById(R.id.riv_media);
+            mAivMedia = itemView.findViewById(R.id.aiv_media);
             mAtvCheck = itemView.findViewById(R.id.atv_media_check);
-            mAtvVideoLength = itemView.findViewById(R.id.atv_video_length);
+            mAtvMediaType = itemView.findViewById(R.id.atv_type);
             mViewMask = itemView.findViewById(R.id.view_mask);
+            mFlCheck = itemView.findViewById(R.id.fl_check);
 
         }
     }

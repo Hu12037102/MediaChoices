@@ -13,10 +13,10 @@ import java.util.List;
  * 描述:
  */
 public interface OnLoadMediaCallback {
-    default void onStart() {
+    default void onMediaStart() {
     }
 
-    void onSucceed(@NonNull List<MediaFolder> data);
+    void onMediaSucceed(@NonNull List<MediaFolder> data);
 
-   default void onEmpty(){};
+   default void onMediaEmpty(){};
 }

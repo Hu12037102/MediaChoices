@@ -11,7 +11,6 @@
     app:back_left_drawable="@mipmap/icon_media_cancel"
     app:layout_constraintTop_toTopOf="parent"
     app:center_data="@string/all_file"
-    app:center_src_res="@mipmap/icon_media_check_direction"
    />
     <com.xiaobai.media.weight.BaseRecyclerView
         android:id="@+id/rv_data"

@@ -1,18 +1,14 @@
 package com.xiaobai.media.activity;
 
 import android.Manifest;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
-import android.view.animation.LinearInterpolator;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 
-import com.bumptech.glide.Glide;
 import com.xiaobai.media.MediaSelector;
 import com.xiaobai.media.OnLoadMediaCallback;
 import com.xiaobai.media.R;
@@ -21,6 +17,7 @@ import com.xiaobai.media.bean.MediaFile;
 import com.xiaobai.media.bean.MediaFolder;
 import com.xiaobai.media.permission.imp.OnPermissionsResult;
 import com.xiaobai.media.resolver.MediaHelper;
+import com.xiaobai.media.utils.DataUtils;
 import com.xiaobai.media.weight.BaseRecyclerView;
 import com.xiaobai.media.weight.FolderPopupWindow;
 import com.xiaobai.media.weight.TitleView;
@@ -35,7 +32,7 @@ import java.util.List;
  * 更新时间: 2020/6/20 20:14
  * 描述:
  */
-public class MediaActivity extends ObjectActivity {
+public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback {
 
     private BaseRecyclerView mRvMediaFile;
     public static final int GRID_COUNT = 4;
@@ -44,7 +41,10 @@ public class MediaActivity extends ObjectActivity {
     public boolean isUp;
     private List<MediaFolder> mAllMediaFolderData;
     private ObjectAnimator mFolderAnimator;
-    FolderPopupWindow folderPopupWindow;
+    FolderPopupWindow mFolderPopupWindow;
+    private List<MediaFile> mMediaFileData;
+    private MediaFileAdapter mMediaFileAdapter;
+    private List<MediaFile> mCheckMediaData;
 
     @Override
     protected int getLayoutId() {
@@ -52,49 +52,17 @@ public class MediaActivity extends ObjectActivity {
     }
 
     @Override
-    protected void initView() {
-        mRvMediaFile = findViewById(R.id.rv_data);
-        mRvMediaFile.setLayoutManager(new GridLayoutManager(this, MediaActivity.GRID_COUNT));
-        mTitleViewTop = findViewById(R.id.title_view_top);
-
-    }
-
-    @Override
-    protected void initData() {
-        List<MediaFile> mMediaFileData = new ArrayList<>();
-        mAllMediaFolderData = new ArrayList<>();
-        MediaFileAdapter mMediaFileAdapter = new MediaFileAdapter(this,mMediaOption.isShowCamera, mMediaFileData);
-        mRvMediaFile.setAdapter(mMediaFileAdapter);
-        MediaHelper.create(this).loadMediaResolver(mMediaOption.mediaType == MediaSelector.MediaOption.MEDIA_ALL, data -> {
-            mAllMediaFolderData.addAll(data);
-            mMediaFileData.addAll(data.get(0).fileData);
-            mMediaFileAdapter.notifyDataSetChanged();
-        });
-    }
-
-    @Override
-    protected void initEvent() {
-        mTitleViewTop.setOnCenterClickListener(new TitleView.OnCenterClickListener() {
-            @Override
-            public void onCenterClick(@NonNull View view) {
-                isUp = !isUp;
-                showTitleViewCenterAnimation(isUp);
-
-            }
-        });
-    }
-
-    @Override
     protected void initPermission() {
+        mCheckMediaData = new ArrayList<>();
         Intent intent = getIntent();
-        ArrayList mCheckMediaFileData = intent.getParcelableArrayListExtra(MediaSelector.KEY_MEDIA_DATA);
         mMediaOption = intent.getParcelableExtra(MediaSelector.KEY_MEDIA_OPTION);
         if (mMediaOption == null) {
             mMediaOption = MediaSelector.getDefaultOption();
         }
+        if (DataUtils.getListSize(mMediaOption.selectorFileData) > 0) {
+            mCheckMediaData.addAll(mMediaOption.selectorFileData);
+        }
         requestPermissions();
-
-
     }
 
     private void requestPermissions() {
@@ -117,30 +85,82 @@ public class MediaActivity extends ObjectActivity {
 
     }
 
-    private void showTitleViewCenterAnimation(boolean isUp) {
-        if (mFolderAnimator !=null && mFolderAnimator.isRunning()){
-            mFolderAnimator.cancel();
+    @Override
+    protected void initView() {
+        mRvMediaFile = findViewById(R.id.rv_data);
+        mRvMediaFile.setLayoutManager(new GridLayoutManager(this, MediaActivity.GRID_COUNT));
+        mTitleViewTop = findViewById(R.id.title_view_top);
+        mTitleViewTop.mTvCenter.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.icon_media_down, 0);
+    }
+
+    @Override
+    protected void initData() {
+
+        mMediaFileData = new ArrayList<>();
+        mAllMediaFolderData = new ArrayList<>();
+        mMediaFileAdapter = new MediaFileAdapter(this, mMediaOption.isShowCamera, mMediaFileData, mCheckMediaData);
+        mMediaFileAdapter.setHasStableIds(true);
+        mRvMediaFile.setAdapter(mMediaFileAdapter);
+        MediaHelper.create(this).loadMediaResolver(mMediaOption, this);
+    }
+
+    @Override
+    protected void initEvent() {
+        mTitleViewTop.setOnCenterClickListener(new TitleView.OnCenterClickListener() {
+            @Override
+            public void onCenterClick(@NonNull View view) {
+                notifyFolderWindow();
+            }
+        });
+    }
+
+    private void notifyFolderWindow() {
+        if (DataUtils.isListEmpty(mAllMediaFolderData)) {
+            Toasts.showToast(getApplicationContext(), R.string.you_media_not_file);
+            return;
         }
-        if (isUp) {
-            mFolderAnimator = ObjectAnimator.ofFloat(mTitleViewTop.mAivCenter, "rotation", 0f, 180f);
+        if (mFolderPopupWindow == null) {
+            mFolderPopupWindow = new FolderPopupWindow(MediaActivity.this, mAllMediaFolderData);
+            mFolderPopupWindow.setOnClickFolderListener(new FolderPopupWindow.OnClickFolderListener() {
+                @Override
+                public void onClickItem(@NonNull View view, @NonNull MediaFolder folders) {
+                    mMediaFileData.clear();
+                    mMediaFileData.addAll(folders.fileData);
+                    mMediaFileAdapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void onDismiss() {
+                    notifyFolderWindow();
+                }
+            });
+        }
+        if (!mFolderPopupWindow.isShowing()) {
+            mFolderPopupWindow.showAsDropDown(mTitleViewTop);
+            mTitleViewTop.mTvCenter.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.icon_media_up, 0);
         } else {
-            mFolderAnimator = ObjectAnimator.ofFloat(mTitleViewTop.mAivCenter, "rotation", 180f, 360f);
+            mTitleViewTop.mTvCenter.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.icon_media_down, 0);
+            mFolderPopupWindow.dismiss();
         }
 
-        mFolderAnimator.setDuration(200);
-        mFolderAnimator.setRepeatCount(0);
-        mFolderAnimator.setInterpolator(new DecelerateInterpolator());
-        mFolderAnimator.start();
+    }
 
-        if (folderPopupWindow==null){
-            folderPopupWindow = new FolderPopupWindow(MediaActivity.this, mAllMediaFolderData);
-        }
 
-        if (isUp) {
-            folderPopupWindow.showAsDropDown(mTitleViewTop);
-        } else {
-            folderPopupWindow.dismiss();
+    @Override
+    public void onMediaSucceed(@NonNull List<MediaFolder> data) {
+        if (DataUtils.getListSize(data) > 0) {
+            mAllMediaFolderData.addAll(data);
+            mMediaFileData.addAll(data.get(0).fileData);
+            mMediaFileAdapter.notifyDataSetChanged();
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        if (mFolderPopupWindow != null && mFolderPopupWindow.isShowing()) {
+            notifyFolderWindow();
+        } else {
+            super.onBackPressed();
+        }
+    }
 }

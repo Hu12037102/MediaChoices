@@ -15,6 +15,9 @@
     <color name="colorFF63AEB8">#FF63AEB8</color>
     <color name="colorFF5FACB6">#FF5FACB6</color>
     <color name="color3300000">#33000000</color>
+    <color name="color20000000">#20000000</color>
+    <color name="color10000000">#10000000</color>
+    <color name="color60000000">#60000000</color>
     <color name="color80000000">#80000000</color>
 
     <color name="colorLine">@color/colorFFEFEFEF</color>
@@ -24,5 +27,8 @@
     <color name="color4">@color/colorFF999999</color>
     <color name="colorFF9B9B9B">#FF9B9B9B</color>
     <color name="colorWhite">@android:color/white</color>
+    <color name="colorPlaceholder">@color/colorFFF5F5F5</color>
+    <color name="colorError">@color/colorFFF5F5F5</color>
+    <color name="colorFFF5F5F5">#FFF5F5F5</color>
 
 </resources>

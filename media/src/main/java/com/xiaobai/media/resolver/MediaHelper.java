@@ -11,9 +11,11 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.xiaobai.media.MediaSelector;
 import com.xiaobai.media.OnLoadMediaCallback;
 import com.xiaobai.media.bean.MediaFile;
 import com.xiaobai.media.bean.MediaFolder;
+import com.xiaobai.media.utils.DataUtils;
 import com.xiaobai.media.utils.FileUtils;
 import com.xiaobai.media.R;
 
@@ -60,17 +62,19 @@ public class MediaHelper {
         return new MediaHelper(activity);
     }
 
-    public void loadMediaResolver(boolean isLoadAll, OnLoadMediaCallback onLoadMediaCallback) {
+    public void loadMediaResolver(MediaSelector.MediaOption option, OnLoadMediaCallback onLoadMediaCallback) {
+
         Activity activity = mWeak.get();
-        if (activity == null) {
+        if (activity == null || option == null) {
             return;
         }
+        boolean isLoadAll = (option.mediaType == MediaSelector.MediaOption.MEDIA_ALL);
         List<MediaFile> allMediaData = new ArrayList<>();
         List<MediaFile> allMediaVideoData = new ArrayList<>();
         //所有文件夹
         List<MediaFolder> allFolderData = new ArrayList<>();
         if (onLoadMediaCallback != null) {
-            onLoadMediaCallback.onStart();
+            onLoadMediaCallback.onMediaStart();
         }
         Cursor cursor = activity.getContentResolver().query(MediaHelper.QUERY_URI, isLoadAll ? ALL_PROJECTION : MediaHelper.IMAGE_PROJECTION, isLoadAll ? ALL_SELECTION_TYPE : MediaHelper.IMAGE_SELECTION_TYPE, isLoadAll ? ALL_WHERE_TYPE : MediaHelper.IMAGE_WHERE_TYPE, SORT_ORDER);
         if (cursor != null && cursor.getCount() > 0) {
@@ -80,7 +84,7 @@ public class MediaHelper {
                 if (!FileUtils.existsImageFile(mediaFile.filePath) && !FileUtils.existsVideoFile(mediaFile.filePath)) {
                     continue;
                 }
-                Log.w("loadMediaResolver--",mediaFile.filePath);
+                Log.w("loadMediaResolver--", mediaFile.filePath + "\n" + FileUtils.getFileMinType(mediaFile.filePath));
                 boolean isVideo = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE)) == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
 
                 if (isVideo) {
@@ -108,7 +112,11 @@ public class MediaHelper {
                 mediaFile.parentName = FileUtils.getParentFileName(mediaFile.filePath);
                 mediaFile.parentPath = FileUtils.getParentFilePath(mediaFile.filePath);
 
+             /*   List<MediaFile> mediaFiles = option.selectorFileData;
+                mediaFile.isCheck = !DataUtils.isListEmpty(mediaFiles) && mediaFiles.contains(mediaFile);*/
+
                 allMediaData.add(mediaFile);
+
                 MediaFolder mediaFolder = new MediaFolder();
                 mediaFolder.folderPath = mediaFile.parentPath;
                 if (allFolderData.size() > 0 && allFolderData.contains(mediaFolder)) {
@@ -117,6 +125,7 @@ public class MediaHelper {
                     mediaFolder.folderName = mediaFile.parentName;
                     mediaFolder.folderPath = mediaFile.parentPath;
                     mediaFolder.firstFilePath = mediaFile.filePath;
+                    mediaFolder.fileData.add(mediaFile);
                     allFolderData.add(mediaFolder);
                 }
             }
@@ -140,19 +149,19 @@ public class MediaHelper {
                     allVideoFolder.isAllVideo = true;
                     allFolderData.add(allFolderData.indexOf(allFolder) + 1, allVideoFolder);
                 }
-                if (onLoadMediaCallback !=null){
-                    onLoadMediaCallback.onSucceed(allFolderData);
+                if (onLoadMediaCallback != null) {
+                    onLoadMediaCallback.onMediaSucceed(allFolderData);
                 }
             } else {
                 if (onLoadMediaCallback != null) {
-                    onLoadMediaCallback.onEmpty();
+                    onLoadMediaCallback.onMediaEmpty();
                 }
             }
 
 
         } else {
             if (onLoadMediaCallback != null) {
-                onLoadMediaCallback.onEmpty();
+                onLoadMediaCallback.onMediaEmpty();
             }
         }
     }

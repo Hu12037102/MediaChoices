@@ -16,6 +16,8 @@ import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.cache.DiskLruCacheFactory;
 import com.bumptech.glide.load.engine.cache.LruResourceCache;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.xiaobai.media.R;
 
@@ -80,37 +82,20 @@ public class GlideManger {
         Glide.init(mApplicationContext, builder);
         // Glide.init(UIUtils.getBaseContext(), );
     }
-
-    public void loadImage(@NonNull Context context, @NonNull Object obj, @NonNull ImageView imageView, @DrawableRes int placeholderRes, @DrawableRes int errorRes) {
-        /*RequestBuilder<Drawable> glideRequest = Glide.with(context).asDrawable();
-        if (obj instanceof String) {
-            String url = (String) obj;
-            glideRequest = glideRequest.load(url);
-        } else if (obj instanceof Uri) {
-            Uri uri = (Uri) obj;
-            glideRequest = glideRequest.load(uri);
-        } else if (obj instanceof Integer) {
-            Integer resDrawable = (Integer) obj;
-            glideRequest = glideRequest.load(resDrawable);
-        } else if (obj instanceof File) {
-            File file = (File) obj;
-            glideRequest = glideRequest.load(file);
-        } else if (obj instanceof Drawable) {
-            Drawable drawable = (Drawable) obj;
-            glideRequest = glideRequest.load(drawable);
-        } else {
+    public void loadImage(Object o, ImageView imageView) {
+        if (o == null || imageView == null) {
             return;
         }
-        glideRequest.placeholder(placeholderRes).error(errorRes).into(imageView);*/
-        Glide.with(context).load(obj).placeholder(placeholderRes).error(errorRes).into(imageView);
+        Glide.with(imageView).load(o).placeholder(R.color.colorPlaceholder).error(R.color.colorError).into(imageView);
     }
-
-    public void loadImage(@NonNull Context context, @NonNull Object obj, @NonNull ImageView imageView) {
-        loadImage(context, obj, imageView, 0, 0);
+    public void loadRoundImage(Object o, ImageView imageView, int radius) {
+        if (o == null || imageView == null) {
+            return;
+        }
+        Glide.with(imageView.getContext()).load(o).apply(createRoundedRequestOptions(radius)).placeholder(R.drawable.shape_placeholder_error_radous_view).error(R.drawable.shape_placeholder_error_radous_view).into(imageView);
     }
-
-    public void loadMediaImage(@NonNull Context context, @NonNull Object obj, @NonNull ImageView imageView) {
-        loadImage(context, obj, imageView, R.mipmap.icon_media_image_placeholder, R.mipmap.icon_media_image_placeholder);
+    private RequestOptions createRoundedRequestOptions(int radius) {
+        return new RequestOptions()
+                .transform(new CenterCrop(), new RoundedCorners(radius));
     }
-
 }

@@ -1,6 +1,8 @@
 package com.xiaobai.media.adapter;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +31,12 @@ public class PreviewMediaAdapter extends RecyclerView.Adapter<PreviewMediaAdapte
     private Context mContext;
     private List<MediaFile> mData;
 
+    public void setOnClickPreviewMediaListener(OnClickPreviewMediaListener onClickPreviewMediaListener) {
+        this.onClickPreviewMediaListener = onClickPreviewMediaListener;
+    }
+
+    private OnClickPreviewMediaListener onClickPreviewMediaListener;
+
     public PreviewMediaAdapter(@NonNull Context context, @NonNull List<MediaFile> data) {
         this.mContext = context;
         this.mData = data;
@@ -53,6 +61,15 @@ public class PreviewMediaAdapter extends RecyclerView.Adapter<PreviewMediaAdapte
             holder.mAivContent.setVisibility(View.VISIBLE);
             holder.mAivVideo.setVisibility(View.VISIBLE);
             GlideManger.get(mContext).loadPreviewImage(mediaFile.filePath, holder.mAivContent);
+            holder.mAivVideo.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (onClickPreviewMediaListener != null) {
+                        onClickPreviewMediaListener.onClickVideo(v, position);
+                    }
+
+                }
+            });
         } else if (FileUtils.isGifMinType(mediaFile.filePath)) {
             holder.mPhotoView.setVisibility(View.GONE);
             holder.mAivContent.setVisibility(View.VISIBLE);
@@ -63,7 +80,23 @@ public class PreviewMediaAdapter extends RecyclerView.Adapter<PreviewMediaAdapte
             holder.mAivContent.setVisibility(View.GONE);
             holder.mAivVideo.setVisibility(View.GONE);
             GlideManger.get(mContext).loadPreviewImage(mediaFile.filePath, holder.mPhotoView);
+            holder.mPhotoView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (onClickPreviewMediaListener != null) {
+                        onClickPreviewMediaListener.onClickPager(v, position);
+                    }
+                }
+            });
         }
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (onClickPreviewMediaListener != null) {
+                    onClickPreviewMediaListener.onClickPager(v, position);
+                }
+            }
+        });
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -80,4 +113,9 @@ public class PreviewMediaAdapter extends RecyclerView.Adapter<PreviewMediaAdapte
         }
     }
 
+    public interface OnClickPreviewMediaListener {
+        void onClickVideo(@NonNull View view, int position);
+
+        void onClickPager(@NonNull View view, int position);
+    }
 }

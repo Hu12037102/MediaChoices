@@ -115,10 +115,21 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
                 notifyFolderWindow();
             }
         });
-        mMediaFileAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
+
+        mMediaFileAdapter.setOnClickMediaListener(new MediaFileAdapter.OnClickMediaListener() {
             @Override
-            public void onItemClick(View view, int position) {
+            public void onClickMedia(@NonNull View view, int position) {
                 startToPreview(position);
+            }
+
+            @Override
+            public void onClickCamera(@NonNull View view, int position) {
+
+            }
+
+            @Override
+            public void onCheckMedia(@NonNull View view, int position) {
+                updateTitleSureText(mTitleViewTop.mTvSure, mCheckMediaData, mMediaOption.maxSelectorMediaCount);
             }
         });
     }
@@ -126,9 +137,10 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
     private void startToPreview(int position) {
         ParcelableManger manger = ParcelableManger.get();
         manger.putData(mMediaFileData);
-        Intent intent = new Intent(this,PreviewActivity.class);
+        Intent intent = new Intent(this, PreviewActivity.class);
         intent.putParcelableArrayListExtra(ObjectActivity.KEY_PARCELABLE_CHECK_DATA, (ArrayList<? extends Parcelable>) mCheckMediaData);
         intent.putExtra(ObjectActivity.KEY_INDEX_CHECK_POSITION, position);
+        intent.putExtra(ObjectActivity.KEY_MEDIA_OPTION, mMediaOption);
         startActivity(intent);
     }
 
@@ -167,6 +179,7 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
 
     @Override
     public void onMediaSucceed(@NonNull List<MediaFolder> data) {
+        updateTitleSureText(mTitleViewTop.mTvSure, mCheckMediaData, mMediaOption.maxSelectorMediaCount);
         if (DataUtils.getListSize(data) > 0) {
             mAllMediaFolderData.addAll(data);
             mMediaFileData.addAll(data.get(0).fileData);

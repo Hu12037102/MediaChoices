@@ -171,13 +171,13 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, T>
             if (isHaveHeadView) {
                 i--;
             }
-            onBindViewDataHolder(viewHolder, i);
             int finalI = i;
             viewHolder.itemView.setOnClickListener(view -> {
                 if (onItemClickListener != null) {
                     onItemClickListener.onItemClick(view, finalI);
                 }
             });
+            onBindViewDataHolder(viewHolder, i);
         }
     }
 

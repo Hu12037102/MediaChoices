@@ -25,10 +25,11 @@
     <color name="color2">@color/colorTheme</color>
     <color name="color3">@color/colorFF666666</color>
     <color name="color4">@color/colorFF999999</color>
-    <color name="colorFF9B9B9B">#FF9B9B9B</color>
+    <color name="colorFF9B9B9B">#9B9B9B</color>
     <color name="colorWhite">@android:color/white</color>
     <color name="colorPlaceholder">@color/colorFFF5F5F5</color>
     <color name="colorError">@color/colorFFF5F5F5</color>
     <color name="colorFFF5F5F5">#FFF5F5F5</color>
+    <color name="colorBlack">@android:color/black</color>
 
 </resources>

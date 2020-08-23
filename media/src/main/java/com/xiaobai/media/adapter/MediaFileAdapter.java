@@ -1,6 +1,7 @@
 package com.xiaobai.media.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,11 +36,6 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
     private static final int TYPE_CAMERA = 1;
     private List<MediaFile> mCheckMediaData;
 
-    public void setOnClickCameraListener(OnClickCameraListener onClickCameraListener) {
-        this.onClickCameraListener = onClickCameraListener;
-    }
-
-    private OnClickCameraListener onClickCameraListener;
 
     public void setOnClickMediaListener(OnClickMediaListener onClickMediaListener) {
         this.onClickMediaListener = onClickMediaListener;
@@ -71,8 +67,8 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
             cameraViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (onClickCameraListener != null) {
-                        onClickCameraListener.onClickCamera(v, finalPosition);
+                    if (onClickMediaListener != null) {
+                        onClickMediaListener.onClickCamera(v, finalPosition);
                     }
                 }
             });
@@ -84,7 +80,7 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
             Context context = holder.itemView.getContext();
             MediaFileViewHolder fileViewHolder = (MediaFileViewHolder) holder;
             MediaFile mediaFile = mData.get(position);
-
+            fileViewHolder.mAtvCheck.setVisibility(mOption.isCompress | mediaFile.mediaType == MediaFile.TYPE_VIDEO ? View.GONE : View.VISIBLE);
             GlideManger.get(context).loadRoundImage(mediaFile.filePath, fileViewHolder.mAivMedia, ScreenUtils.dp2px(holder.itemView.getContext(), 5));
             updateCheckMedia(mediaFile, fileViewHolder);
             if (FileUtils.isVideoMinType(mediaFile.filePath)) {
@@ -98,7 +94,7 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
             } else {
                 fileViewHolder.mAtvMediaType.setVisibility(View.GONE);
             }
-
+            int finalPosition = position;
 
             fileViewHolder.mFlCheck.setOnClickListener(v -> {
                 if (mCheckMediaData.contains(mediaFile)) {
@@ -119,8 +115,25 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
 
                     }
                     mCheckMediaData.add(mediaFile);
+                    if (onClickMediaListener != null) {
+                        onClickMediaListener.onCheckMedia(v, finalPosition);
+                    }
                 }
                 notifyDataSetChanged();
+            });
+
+            fileViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.w("setOnClickListener--", "点击了我");
+                    if (DataUtils.getListSize(mCheckMediaData) >= 1 && mCheckMediaData.get(0).mediaType != mediaFile.mediaType) {
+                        Toasts.showToast(mContext, R.string.not_selector_video_and_image);
+                        return;
+                    }
+                    if (onClickMediaListener != null) {
+                        onClickMediaListener.onClickMedia(v, finalPosition);
+                    }
+                }
             });
 
         }
@@ -194,14 +207,13 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
         }
     }
 
-    public interface OnClickCameraListener {
-        void onClickCamera(@NonNull View view, int position);
-    }
 
     public interface OnClickMediaListener {
         void onClickMedia(@NonNull View view, int position);
 
+        void onClickCamera(@NonNull View view, int position);
 
+        void onCheckMedia(@NonNull View view, int position);
     }
 
     public static void setItemParams(@NonNull View itemView) {

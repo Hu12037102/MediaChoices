@@ -80,7 +80,7 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
             Context context = holder.itemView.getContext();
             MediaFileViewHolder fileViewHolder = (MediaFileViewHolder) holder;
             MediaFile mediaFile = mData.get(position);
-            fileViewHolder.mAtvCheck.setVisibility(mOption.isCompress | mediaFile.mediaType == MediaFile.TYPE_VIDEO ? View.GONE : View.VISIBLE);
+            fileViewHolder.mAtvCheck.setVisibility(mOption.isCrop | mediaFile.mediaType == MediaFile.TYPE_VIDEO ? View.GONE : View.VISIBLE);
             GlideManger.get(context).loadRoundImage(mediaFile.filePath, fileViewHolder.mAivMedia, ScreenUtils.dp2px(holder.itemView.getContext(), 5));
             updateCheckMedia(mediaFile, fileViewHolder);
             if (FileUtils.isVideoMinType(mediaFile.filePath)) {
@@ -99,6 +99,9 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
             fileViewHolder.mFlCheck.setOnClickListener(v -> {
                 if (mCheckMediaData.contains(mediaFile)) {
                     mCheckMediaData.remove(mediaFile);
+                    if (onClickMediaListener != null) {
+                        onClickMediaListener.onCheckMediaChange(v, finalPosition,false);
+                    }
                 } else {
                     if (DataUtils.getListSize(mCheckMediaData) >= mOption.maxSelectorMediaCount) {
                         Toasts.showToast(mContext.getApplicationContext(), R.string.max_selector_media_count, mOption.maxSelectorMediaCount);
@@ -116,7 +119,7 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
                     }
                     mCheckMediaData.add(mediaFile);
                     if (onClickMediaListener != null) {
-                        onClickMediaListener.onCheckMedia(v, finalPosition);
+                        onClickMediaListener.onCheckMediaChange(v, finalPosition,true);
                     }
                 }
                 notifyDataSetChanged();
@@ -213,7 +216,7 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
 
         void onClickCamera(@NonNull View view, int position);
 
-        void onCheckMedia(@NonNull View view, int position);
+        void onCheckMediaChange(@NonNull View view, int position, boolean isCheck);
     }
 
     public static void setItemParams(@NonNull View itemView) {

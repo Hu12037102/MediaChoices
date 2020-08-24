@@ -16,12 +16,20 @@
         <item name="android:layout_height">1dp</item>
         <item name="android:background">@color/colorLine</item>
     </style>
+
     <style name="DefaultDialogAnimation" parent="android:Animation.Dialog">
         <item name="android:windowEnterAnimation">@anim/anim_dialog_in</item>
         <item name="android:windowExitAnimation">@anim/anim_dialog_out</item>
     </style>
+
     <style name="PreviewTheme" parent="BaseAppTheme">
         <item name="android:fitsSystemWindows">false</item>
         <item name="android:clipToPadding">false</item>
+    </style>
+
+    <style name="MaskView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:background">@color/color10000000</item>
     </style>
 </resources>

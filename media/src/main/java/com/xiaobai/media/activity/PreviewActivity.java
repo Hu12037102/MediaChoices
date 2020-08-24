@@ -143,7 +143,10 @@ public class PreviewActivity extends ObjectActivity {
         mBottomTitleView.setOnSureViewClickListener(new TitleView.OnSureViewClickListener() {
             @Override
             public void onSureClick(@NonNull View view) {
-                if (!mOptions.isSelectorMultiple && DataUtils.getListSize(mCheckMediaFileData) >= 1) {
+                if (DataUtils.getListSize(mCheckMediaFileData) >= mOptions.maxSelectorMediaCount) {
+                    Toasts.showToast(PreviewActivity.this, R.string.max_selector_media_count, mOptions.maxSelectorMediaCount);
+                    return;
+                } else if (!mOptions.isSelectorMultiple && DataUtils.getListSize(mCheckMediaFileData) >= 1) {
                     MediaFile checkMedia = mCheckMediaFileData.get(0);
                     MediaFile mediaFile = mMediaFileData.get(mPreviewPosition);
                     if (mediaFile.mediaType != checkMedia.mediaType) {

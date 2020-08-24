@@ -1,6 +1,7 @@
 package com.xiaobai.media.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
+import com.xiaobai.media.MediaSelector;
 import com.xiaobai.media.R;
 import com.xiaobai.media.bean.MediaFile;
 import com.xiaobai.media.permission.PermissionActivity;
@@ -21,6 +23,7 @@ import com.xiaobai.media.utils.DataUtils;
 import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,7 +33,7 @@ import java.util.List;
  * 描述:
  */
 public abstract class ObjectActivity extends PermissionActivity {
-    public static final String KEY_PARCELABLE_CHECK_DATA = "key_parcelable_check_data";
+    public static final String KEY_PARCELABLE_LIST_CHECK_DATA = "key_parcelable_list_check_data";
     public static final String KEY_INDEX_CHECK_POSITION = "key_index_check_position";
     public static final String KEY_MEDIA_OPTION = "key_media_option";
 
@@ -94,14 +97,22 @@ public abstract class ObjectActivity extends PermissionActivity {
     }
 
     public void updateTitleSureText(@NonNull TextView textView, @NonNull List<MediaFile> checkMediaData, int maxSelectorSize) {
-        if (DataUtils.isListEmpty(checkMediaData)) {
+        if (DataUtils.getListSize(checkMediaData) <= 0) {
             textView.setEnabled(false);
             textView.setTextColor(ContextCompat.getColor(this, R.color.color4));
             textView.setText(R.string.complete);
         } else {
             textView.setEnabled(true);
             textView.setTextColor(ContextCompat.getColor(this, R.color.color1));
-            textView.setText(getString(R.string.complete_s, checkMediaData.size() + "", maxSelectorSize + ""));
+            //   textView.setText(getString(R.string.complete_s, checkMediaData.size() + "", maxSelectorSize + ""));
+            textView.setText(R.string.complete);
         }
+    }
+
+    public void clickResultMediaData(ArrayList<MediaFile> checkMediaFileData) {
+        Intent intent = new Intent();
+        intent.putParcelableArrayListExtra(MediaSelector.KEY_PARCELABLE_MEDIA_DATA, checkMediaFileData);
+        setResult(Activity.RESULT_OK, intent);
+        finish();
     }
 }

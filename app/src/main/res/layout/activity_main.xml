@@ -6,4 +6,72 @@
     android:layout_height="match_parent"
     tools:context="com.xiaobai.medias.MainActivity">
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_data"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <CheckBox
+        android:id="@+id/cb_compress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="是否要压缩"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/rv_data" />
+
+    <CheckBox
+        android:id="@+id/cb_crop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="是否要裁剪(视频不支持裁剪、裁剪不能多选)"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cb_compress" />
+
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/act_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:hint="请输入最大选择媒体数"
+        android:inputType="number"
+        android:textSize="@dimen/size_14sp"
+        app:layout_constraintLeft_toLeftOf="@id/cb_crop"
+        app:layout_constraintTop_toBottomOf="@id/cb_crop" />
+
+    <CheckBox
+        android:id="@+id/cb_multiple"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="视频图片混合选择"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/act_count" />
+
+    <CheckBox
+        android:id="@+id/cb_camera"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="要不要显示拍照"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cb_multiple" />
+
+    <CheckBox
+        android:id="@+id/cb_video"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="要不要显示视频"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cb_camera" />
+
+    <Button
+        android:id="@+id/btn_media"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="选择媒体"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cb_video" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

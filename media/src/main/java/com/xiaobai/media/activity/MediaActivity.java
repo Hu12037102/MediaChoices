@@ -1,12 +1,10 @@
 package com.xiaobai.media.activity;
 
 import android.Manifest;
-import android.animation.ObjectAnimator;
+import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Parcelable;
 import android.view.View;
-import android.view.animation.DecelerateInterpolator;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -14,7 +12,6 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import com.xiaobai.media.MediaSelector;
 import com.xiaobai.media.OnLoadMediaCallback;
 import com.xiaobai.media.R;
-import com.xiaobai.media.adapter.BaseRecyclerAdapter;
 import com.xiaobai.media.adapter.MediaFileAdapter;
 import com.xiaobai.media.bean.MediaFile;
 import com.xiaobai.media.bean.MediaFolder;
@@ -47,7 +44,9 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
     FolderPopupWindow mFolderPopupWindow;
     private List<MediaFile> mMediaFileData;
     private MediaFileAdapter mMediaFileAdapter;
-    private List<MediaFile> mCheckMediaData;
+    private ArrayList<MediaFile> mCheckMediaData;
+    public static final int REQUEST_CODE_PREVIEW = 1235;
+    private TitleView mTitleViewBottom;
 
     @Override
     protected int getLayoutId() {
@@ -94,11 +93,12 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
         mRvMediaFile.setLayoutManager(new GridLayoutManager(this, MediaActivity.GRID_COUNT));
         mTitleViewTop = findViewById(R.id.title_view_top);
         mTitleViewTop.mTvCenter.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.icon_media_down, 0);
+        mTitleViewBottom = findViewById(R.id.title_view_bottom);
+        updateBottomLiftTitleView();
     }
 
     @Override
     protected void initData() {
-
         mMediaFileData = new ArrayList<>();
         mAllMediaFolderData = new ArrayList<>();
         mMediaFileAdapter = new MediaFileAdapter(this, mMediaOption, mMediaFileData, mCheckMediaData);
@@ -115,6 +115,24 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
                 notifyFolderWindow();
             }
         });
+        mTitleViewTop.setOnSureViewClickListener(new TitleView.OnSureViewClickListener() {
+            @Override
+            public void onSureClick(@NonNull View view) {
+                clickResultMediaData(mCheckMediaData);
+            }
+        });
+        mTitleViewBottom.setOnTitleViewClickListener(new TitleView.OnTitleViewClickListener() {
+            @Override
+            public void onBackClick(@NonNull View view) {
+                mMediaOption.isCompress = !mMediaOption.isCompress;
+                updateBottomLiftTitleView();
+            }
+
+            @Override
+            public void onSureClick(@NonNull View view) {
+
+            }
+        });
 
         mMediaFileAdapter.setOnClickMediaListener(new MediaFileAdapter.OnClickMediaListener() {
             @Override
@@ -128,7 +146,7 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
             }
 
             @Override
-            public void onCheckMedia(@NonNull View view, int position) {
+            public void onCheckMediaChange(@NonNull View view, int position, boolean isCheck) {
                 updateTitleSureText(mTitleViewTop.mTvSure, mCheckMediaData, mMediaOption.maxSelectorMediaCount);
             }
         });
@@ -138,10 +156,21 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
         ParcelableManger manger = ParcelableManger.get();
         manger.putData(mMediaFileData);
         Intent intent = new Intent(this, PreviewActivity.class);
-        intent.putParcelableArrayListExtra(ObjectActivity.KEY_PARCELABLE_CHECK_DATA, (ArrayList<? extends Parcelable>) mCheckMediaData);
+        intent.putParcelableArrayListExtra(ObjectActivity.KEY_PARCELABLE_LIST_CHECK_DATA, (ArrayList<? extends Parcelable>) mCheckMediaData);
         intent.putExtra(ObjectActivity.KEY_INDEX_CHECK_POSITION, position);
         intent.putExtra(ObjectActivity.KEY_MEDIA_OPTION, mMediaOption);
-        startActivity(intent);
+        startActivityForResult(intent, MediaActivity.REQUEST_CODE_PREVIEW);
+    }
+
+    public void updateBottomLiftTitleView() {
+        if (mMediaOption != null) {
+            if (mMediaOption.isCompress) {
+                mTitleViewBottom.mTvBack.setCompoundDrawablesWithIntrinsicBounds(R.mipmap.icon_media_default, 0, 0, 0);
+            } else {
+                mTitleViewBottom.mTvBack.setCompoundDrawablesWithIntrinsicBounds(R.mipmap.icon_media_check, 0, 0, 0);
+            }
+        }
+
     }
 
     private void notifyFolderWindow() {
@@ -194,5 +223,31 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == MediaActivity.REQUEST_CODE_PREVIEW) {
+            //当媒体库选择完成时候回调
+            if (resultCode == Activity.RESULT_OK && data != null) {
+                ArrayList<MediaFile> checkMediaFile = data.getParcelableArrayListExtra(MediaSelector.KEY_PARCELABLE_MEDIA_DATA);
+                if (!DataUtils.isListEmpty(checkMediaFile)) {
+                    clickResultMediaData(checkMediaFile);
+                }
+                //当从上一个页面返回时候回调（非点击完成按钮）
+            } else if (resultCode == PreviewActivity.RESULT_CODE_BACK) {
+                ArrayList<MediaFile> checkMediaFile = data.getParcelableArrayListExtra(ObjectActivity.KEY_PARCELABLE_LIST_CHECK_DATA);
+                if (!DataUtils.isListEmpty(checkMediaFile)) {
+                    if (mCheckMediaData.size() > 0) {
+                        mCheckMediaData.clear();
+                    }
+                    mCheckMediaData.addAll(checkMediaFile);
+                    mMediaFileAdapter.notifyDataSetChanged();
+                }
+            }
+        }
+
+
     }
 }

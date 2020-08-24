@@ -3,6 +3,8 @@ package com.xiaobai.media.bean;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
+
 public class MediaFile implements Parcelable {
     public static final int TYPE_IMAGE = 0;
     public static final int TYPE_VIDEO = 1;
@@ -13,10 +15,12 @@ public class MediaFile implements Parcelable {
     public int height;
     public String parentName;
     public String parentPath;
-   // public boolean isCheck;
+    // public boolean isCheck;
     public long fileDuration;
     public int mediaType;
-    public MediaFile(){}
+
+    public MediaFile() {
+    }
 
     protected MediaFile(Parcel in) {
         fileName = in.readString();
@@ -26,7 +30,7 @@ public class MediaFile implements Parcelable {
         height = in.readInt();
         parentName = in.readString();
         parentPath = in.readString();
-       // isCheck = in.readByte() != 0;
+        // isCheck = in.readByte() != 0;
         fileDuration = in.readLong();
         mediaType = in.readInt();
     }
@@ -72,5 +76,9 @@ public class MediaFile implements Parcelable {
         //dest.writeByte((byte) (isCheck ? 1 : 0));
         dest.writeLong(fileDuration);
         dest.writeInt(mediaType);
+    }
+
+    public static boolean isVideo(MediaFile mediaFile) {
+        return mediaFile != null && mediaFile.mediaType == MediaFile.TYPE_VIDEO;
     }
 }

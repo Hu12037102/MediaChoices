@@ -10,9 +10,11 @@ import androidx.fragment.app.Fragment;
 
 import com.xiaobai.media.activity.MediaActivity;
 import com.xiaobai.media.bean.MediaFile;
+import com.xiaobai.media.utils.DataUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 作者: 胡庆岭
@@ -26,6 +28,7 @@ public class MediaSelector {
     private WeakReference<Activity> mSoftActivity;
     private static final int SELECTOR_MAX_MEDIA_COUNT = 9;
     private static final int SELECTOR_MAX_VIDEO_COUNT = 1;
+    public static final String KEY_PARCELABLE_MEDIA_DATA = "key_parcelable_media_data";
 
     public static final String KEY_MEDIA_OPTION = "key_media_option";
     public static final int REQUEST_CODE_MEDIA = 2080;
@@ -66,6 +69,17 @@ public class MediaSelector {
         }
     }
 
+    public static List<MediaFile> resultMediaData(Intent intent) {
+        List<MediaFile> resultData = new ArrayList<>();
+        if (intent != null) {
+            List<MediaFile> data = intent.getParcelableArrayListExtra(MediaSelector.KEY_PARCELABLE_MEDIA_DATA);
+            if (DataUtils.getListSize(data) > 0) {
+                resultData.addAll(data);
+            }
+        }
+        return resultData;
+    }
+
     public static class MediaOption implements Parcelable {
         //所有媒体类型（图片、视频、gif）
         public static final int MEDIA_ALL = 0;
@@ -80,7 +94,7 @@ public class MediaSelector {
         }
 
         public int maxSelectorMediaCount = MediaSelector.SELECTOR_MAX_MEDIA_COUNT;
-        public boolean isCompress;
+        public boolean isCompress = true;
         public boolean isShowCamera;
         //是不是选择多个
         public boolean isSelectorMultiple;
@@ -89,7 +103,7 @@ public class MediaSelector {
         public int cropScaleY = 1;
         public int cropWidth = 720;
         public int cropSHeight = 720;
-        public int mediaType = MediaOption.MEDIA_ALL;
+        public int mediaType = MediaOption.MEDIA_IMAGE;
         public ArrayList<MediaFile> selectorFileData = new ArrayList<>();
         public int maxSelectorVideoCount = MediaSelector.SELECTOR_MAX_VIDEO_COUNT;
 

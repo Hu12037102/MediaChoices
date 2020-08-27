@@ -44,7 +44,6 @@ public class PreviewActivity extends ObjectActivity {
     private ArrayList<MediaFile> mCheckMediaFileData;
     private int mPreviewPosition;
     private PreviewMediaAdapter mPreviewAdapter;
-    private MediaSelector.MediaOption mOptions;
     private boolean mIsOpenAnimation;
     private AnimatorSet mAnimationSet;
     private RecyclerView mRvCheck;
@@ -89,13 +88,13 @@ public class PreviewActivity extends ObjectActivity {
         Intent intent = getIntent();
         mCheckMediaFileData = intent.getParcelableArrayListExtra(ObjectActivity.KEY_PARCELABLE_LIST_CHECK_DATA);
         mPreviewPosition = intent.getIntExtra(ObjectActivity.KEY_INDEX_CHECK_POSITION, 0);
-        mOptions = intent.getParcelableExtra(ObjectActivity.KEY_MEDIA_OPTION);
+        mMediaOption = intent.getParcelableExtra(ObjectActivity.KEY_MEDIA_OPTION);
         Log.w("PreviewActivity--", mPreviewPosition + "--");
     }
 
 
     private void initPreview() {
-        updateTitleSureText(mTopTitleView.mTvSure, mCheckMediaFileData, mOptions.maxSelectorMediaCount);
+        updateTitleSureText(mTopTitleView.mTvSure, mCheckMediaFileData, mMediaOption.maxSelectorMediaCount);
 
         mPreviewAdapter = new PreviewMediaAdapter(this, mMediaFileData);
         mVpContent.setAdapter(mPreviewAdapter);
@@ -143,7 +142,7 @@ public class PreviewActivity extends ObjectActivity {
         mBottomTitleView.setOnSureViewClickListener(new TitleView.OnSureViewClickListener() {
             @Override
             public void onSureClick(@NonNull View view) {
-                if (!mOptions.isSelectorMultiple && DataUtils.getListSize(mCheckMediaFileData) >= 1) {
+                if (!mMediaOption.isSelectorMultiple && DataUtils.getListSize(mCheckMediaFileData) >= 1) {
                     MediaFile checkMedia = mCheckMediaFileData.get(0);
                     MediaFile mediaFile = mMediaFileData.get(mPreviewPosition);
                     if (mediaFile.mediaType != checkMedia.mediaType) {
@@ -153,7 +152,7 @@ public class PreviewActivity extends ObjectActivity {
                 }
                 updateCheckMediaData();
                 updateCheckView();
-                updateTitleSureText(mTopTitleView.mTvSure, mCheckMediaFileData, mOptions.maxSelectorMediaCount);
+                updateTitleSureText(mTopTitleView.mTvSure, mCheckMediaFileData, mMediaOption.maxSelectorMediaCount);
             }
         });
         mVpContent.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {

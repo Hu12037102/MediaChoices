@@ -10,6 +10,7 @@ public class MediaFile implements Parcelable {
     public static final int TYPE_VIDEO = 1;
     public String fileName;
     public String filePath;
+    public String fileCompressPath = "";
     public int fileSize;
     public int width;
     public int height;
@@ -33,6 +34,7 @@ public class MediaFile implements Parcelable {
         // isCheck = in.readByte() != 0;
         fileDuration = in.readLong();
         mediaType = in.readInt();
+        fileCompressPath = in.readString();
     }
 
     public static final Creator<MediaFile> CREATOR = new Creator<MediaFile>() {
@@ -76,6 +78,7 @@ public class MediaFile implements Parcelable {
         //dest.writeByte((byte) (isCheck ? 1 : 0));
         dest.writeLong(fileDuration);
         dest.writeInt(mediaType);
+        dest.writeString(fileCompressPath);
     }
 
     public static boolean isVideo(MediaFile mediaFile) {

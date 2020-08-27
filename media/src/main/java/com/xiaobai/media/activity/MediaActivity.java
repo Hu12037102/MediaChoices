@@ -37,9 +37,7 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
 
     private BaseRecyclerView mRvMediaFile;
     public static final int GRID_COUNT = 4;
-    private MediaSelector.MediaOption mMediaOption;
     private TitleView mTitleViewTop;
-    public boolean isUp;
     private List<MediaFolder> mAllMediaFolderData;
     FolderPopupWindow mFolderPopupWindow;
     private List<MediaFile> mMediaFileData;

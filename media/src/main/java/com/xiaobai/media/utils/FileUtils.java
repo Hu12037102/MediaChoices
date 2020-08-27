@@ -1,5 +1,8 @@
 package com.xiaobai.media.utils;
 
+import android.content.Context;
+import android.os.Build;
+import android.os.Environment;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
@@ -7,6 +10,7 @@ import androidx.annotation.NonNull;
 import java.io.File;
 import java.net.FileNameMap;
 import java.net.URLConnection;
+import java.util.UUID;
 
 /**
  * 作者: 胡庆岭
@@ -15,6 +19,42 @@ import java.net.URLConnection;
  * 描述:
  */
 public class FileUtils {
+    public static final String MEDIA_FOLDER = "media";
+    public static final String MEDIA_CHOICES = "MediaChoices";
+
+    /**
+     * 外部存储
+     *
+     * @return
+     */
+    public static File getRootFile(@NonNull Context context) {
+        File file;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            file = context.getExternalFilesDir(null);
+        } else {
+            if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+                file = new File(Environment.getExternalStorageDirectory(), MEDIA_CHOICES);
+                mkdirsDirector(file);
+            } else {
+                file = context.getFilesDir();
+            }
+        }
+        return file;
+    }
+
+    public static File createChildDirector(@NonNull String name, @NonNull File parentDirector) {
+        File file = new File(parentDirector, TextUtils.isEmpty(name) ? FileUtils.MEDIA_FOLDER : name);
+        mkdirsDirector(file);
+        return file;
+    }
+
+
+    private static void mkdirsDirector(File director) {
+        if (director != null && director.isDirectory()) {
+            director.mkdirs();
+        }
+    }
+
     public static boolean existsImageFile(@NonNull String path) {
         if (existsFile(path)) {
             String name = new File(path).getName();
@@ -76,6 +116,7 @@ public class FileUtils {
     public static boolean isVideoMinType(String path) {
         return !DataUtils.isEmpty(path) && FileUtils.existsFile(path) && getFileMinType(path).startsWith("video/");
     }
+
     public static boolean isGifMinType(String path) {
         return !DataUtils.isEmpty(path) && FileUtils.existsFile(path) && getFileMinType(path).startsWith("image/gif");
     }
@@ -83,6 +124,7 @@ public class FileUtils {
     public static boolean isImageMinType(String path) {
         return !DataUtils.isEmpty(path) && FileUtils.existsFile(path) && getFileMinType(path).startsWith("image/");
     }
+
     /**
      * 获取时间长度
      *
@@ -109,5 +151,21 @@ public class FileUtils {
             sb.append("0:01");
         }
         return sb.toString();
+    }
+
+    public static String createFileHost() {
+        return "MediaChoices_" + UUID.randomUUID().toString() + "-" + System.currentTimeMillis();
+    }
+
+    public static String createImageName() {
+        return createFileHost() + ".jpg";
+    }
+
+    public static String createGifName() {
+        return createFileHost() + ".gif";
+    }
+
+    public static String createVideoName() {
+        return createFileHost() + ".mp4";
     }
 }

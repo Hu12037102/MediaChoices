@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -20,11 +21,20 @@ import com.xiaobai.media.R;
 import com.xiaobai.media.bean.MediaFile;
 import com.xiaobai.media.permission.PermissionActivity;
 import com.xiaobai.media.utils.DataUtils;
+import com.xiaobai.media.utils.FileUtils;
 import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+
+import io.microshow.rxffmpeg.RxFFmpegInvoke;
+import io.microshow.rxffmpeg.RxFFmpegSubscriber;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+import utils.bean.ImageConfig;
+import utils.task.CompressImageTask;
 
 /**
  * 作者: 胡庆岭
@@ -36,6 +46,7 @@ public abstract class ObjectActivity extends PermissionActivity {
     public static final String KEY_PARCELABLE_LIST_CHECK_DATA = "key_parcelable_list_check_data";
     public static final String KEY_INDEX_CHECK_POSITION = "key_index_check_position";
     public static final String KEY_MEDIA_OPTION = "key_media_option";
+    protected MediaSelector.MediaOption mMediaOption;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -110,9 +121,91 @@ public abstract class ObjectActivity extends PermissionActivity {
     }
 
     public void clickResultMediaData(ArrayList<MediaFile> checkMediaFileData) {
+        if (!DataUtils.isListEmpty(checkMediaFileData) && mMediaOption != null) {
+            if (mMediaOption.isCompress) {
+                for (int i = 0; i < checkMediaFileData.size(); i++) {
+                    int index = i;
+                    MediaFile mediaFile = checkMediaFileData.get(i);
+                    if (FileUtils.isImageMinType(mediaFile.filePath)) {
+                        File compressFile = FileUtils.createChildDirector(FileUtils.MEDIA_FOLDER, FileUtils.getRootFile(this));
+                        compressFile = new File(compressFile, FileUtils.createImageName());
+                        ImageConfig imageConfig = ImageConfig.getDefaultConfig(mediaFile.filePath, compressFile.getAbsolutePath());
+                        CompressImageTask.get().compressImage(imageConfig, new CompressImageTask.OnImageResult() {
+                            @Override
+                            public void startCompress() {
+
+                            }
+
+                            @Override
+                            public void resultFileSucceed(File file) {
+                                mediaFile.fileCompressPath = file.getAbsolutePath();
+                                resultMediaData(checkMediaFileData);
+                            }
+
+                            @Override
+                            public void resultFileError() {
+
+                            }
+                        });
+                    } else if (FileUtils.isVideoMinType(mediaFile.filePath)) {
+                        File compressFile = FileUtils.createChildDirector(FileUtils.MEDIA_FOLDER, FileUtils.getRootFile(this));
+                        compressFile = new File(compressFile, FileUtils.createVideoName());
+                        String compressPath = compressFile.getAbsolutePath();
+                        String[] complexCommand = new String[]{"ffmpeg", "-i", mediaFile.filePath, "-s",
+                                mediaFile.width > mediaFile.height ? "960*540" : "540*960", "-c:v",
+                                "libx264", "-crf", "30", "-preset", "ultrafast", "-y", "-acodec", "libmp3lame", compressPath};
+                        RxFFmpegInvoke.getInstance().runCommandRxJava(complexCommand)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(new RxFFmpegSubscriber() {
+                                    @Override
+                                    public void onFinish() {
+
+                                        mediaFile.fileCompressPath = compressPath;
+                                        if (index == checkMediaFileData.size() - 1) {
+                                            resultMediaData(checkMediaFileData);
+
+                                        }
+                                        Log.w("clickResultMediaData--", "onFinish:" + mediaFile.fileCompressPath);
+                                    }
+
+                                   /* @Override
+                                    public void onProgress(int progress, long progressTime) {
+                                        Log.w("clickResultMediaData--", "onProgress:" + progress);
+                                    }*/
+
+                                    @Override
+                                    public void onProgress(int progress) {
+
+                                    }
+
+
+
+                                    @Override
+                                    public void onCancel() {
+                                        Log.w("clickResultMediaData--", "onCancel:");
+                                    }
+
+                                    @Override
+                                    public void onError(String message) {
+                                        Log.w("clickResultMediaData--", "onError:");
+                                    }
+                                });
+                    }
+                }
+            } else {
+                resultMediaData(checkMediaFileData);
+            }
+        }
+
+    }
+
+    private void resultMediaData(ArrayList<MediaFile> checkMediaFileData) {
         Intent intent = new Intent();
         intent.putParcelableArrayListExtra(MediaSelector.KEY_PARCELABLE_MEDIA_DATA, checkMediaFileData);
         setResult(Activity.RESULT_OK, intent);
         finish();
     }
+
+
 }

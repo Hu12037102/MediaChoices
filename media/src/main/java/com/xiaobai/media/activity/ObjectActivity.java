@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
+import com.xiaobai.media.BuildConfig;
 import com.xiaobai.media.MediaSelector;
 import com.xiaobai.media.R;
 import com.xiaobai.media.bean.MediaFile;
@@ -52,6 +53,7 @@ public abstract class ObjectActivity extends PermissionActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(getLayoutId());
+        RxFFmpegInvoke.getInstance().setDebug(BuildConfig.DEBUG);
         initStatusBar();
         initPermission();
     }
@@ -154,6 +156,11 @@ public abstract class ObjectActivity extends PermissionActivity {
                         String[] complexCommand = new String[]{"ffmpeg", "-i", mediaFile.filePath, "-s",
                                 mediaFile.width > mediaFile.height ? "960*540" : "540*960", "-c:v",
                                 "libx264", "-crf", "30", "-preset", "ultrafast", "-y", "-acodec", "libmp3lame", compressPath};
+
+                      /*  {"ffmpeg", "-i", filePath, "-s",
+                                resource.getWidth() > resource.getHeight() ? "960*540" : "540*960", "-c:v",
+                                "libx264", "-crf", "30", "-preset", "ultrafast", "-y", "-acodec", "libmp3lame", compressVideoPath};*/
+
                         RxFFmpegInvoke.getInstance().runCommandRxJava(complexCommand)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())

@@ -80,7 +80,7 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
             Context context = holder.itemView.getContext();
             MediaFileViewHolder fileViewHolder = (MediaFileViewHolder) holder;
             MediaFile mediaFile = mData.get(position);
-            fileViewHolder.mAtvCheck.setVisibility(mOption.isCrop | mediaFile.mediaType == MediaFile.TYPE_VIDEO ? View.GONE : View.VISIBLE);
+            fileViewHolder.mAtvCheck.setVisibility(mOption.isCrop ? View.GONE : View.VISIBLE);
             GlideManger.get(context).loadRoundImage(mediaFile.filePath, fileViewHolder.mAivMedia, ScreenUtils.dp2px(holder.itemView.getContext(), 5));
             updateCheckMedia(mediaFile, fileViewHolder);
             if (FileUtils.isVideoMinType(mediaFile.filePath)) {

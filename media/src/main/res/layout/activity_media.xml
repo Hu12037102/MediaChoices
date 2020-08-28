@@ -27,12 +27,6 @@
         app:back_left_drawable="@mipmap/icon_master_check"
         app:back_data="@string/master_map"
         app:sure_text_color="@color/colorWhite"
-        app:sure_text_height_size="@dimen/size_28dp"
-        app:sure_text_margin_right="@dimen/default_margin"
-        app:sure_text_size="@dimen/size_12sp"
-        app:sure_text_width_size="@dimen/size_60dp"
-        app:sure_text_background="@drawable/shape_media_send_view"
-       app:sure_data="@string/sender"
         app:back_click_is_finish="false"
         />
 </androidx.constraintlayout.widget.ConstraintLayout>

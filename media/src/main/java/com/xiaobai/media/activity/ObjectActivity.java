@@ -155,7 +155,7 @@ public abstract class ObjectActivity extends PermissionActivity {
                         compressFile = new File(compressFile, FileUtils.createVideoName());
                         String compressPath = compressFile.getAbsolutePath();
                         String[] complexCommand = new String[]{"ffmpeg", "-i", mediaFile.filePath, "-s",
-                                mediaFile.width > mediaFile.height ? "960*540" : "540*960", "-c:v",
+                                mediaFile.width > mediaFile.height ? "1280*720" : "720*1280", "-c:v",
                                 "libx264", "-crf", "30", "-preset", "ultrafast", "-y", "-acodec", "libmp3lame", compressPath};
                         RxFFmpegInvoke.getInstance().runCommandRxJava(complexCommand)
                                 .subscribeOn(Schedulers.io())

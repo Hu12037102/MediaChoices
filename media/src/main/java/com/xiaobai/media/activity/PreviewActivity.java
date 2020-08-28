@@ -142,14 +142,7 @@ public class PreviewActivity extends ObjectActivity {
         mBottomTitleView.setOnSureViewClickListener(new TitleView.OnSureViewClickListener() {
             @Override
             public void onSureClick(@NonNull View view) {
-                if (!mMediaOption.isSelectorMultiple && DataUtils.getListSize(mCheckMediaFileData) >= 1) {
-                    MediaFile checkMedia = mCheckMediaFileData.get(0);
-                    MediaFile mediaFile = mMediaFileData.get(mPreviewPosition);
-                    if (mediaFile.mediaType != checkMedia.mediaType) {
-                        Toasts.showToast(PreviewActivity.this, R.string.not_selector_video_and_image);
-                        return;
-                    }
-                }
+
                 updateCheckMediaData();
                 updateCheckView();
                 updateTitleSureText(mTopTitleView.mTvSure, mCheckMediaFileData, mMediaOption.maxSelectorMediaCount);
@@ -185,9 +178,23 @@ public class PreviewActivity extends ObjectActivity {
         if (mCheckMediaFileData.contains(mediaFile)) {
             mCheckMediaFileData.remove(mediaFile);
         } else {
+            if (DataUtils.getListSize(mCheckMediaFileData) >= mMediaOption.maxSelectorMediaCount) {
+                Toasts.showToast(PreviewActivity.this, R.string.max_selector_media_count, mMediaOption.maxSelectorMediaCount);
+                return;
+            } else if (!mMediaOption.isSelectorMultiple && DataUtils.getListSize(mCheckMediaFileData) >= 1) {
+                MediaFile checkMedia = mCheckMediaFileData.get(0);
+                if (mediaFile.mediaType != checkMedia.mediaType) {
+                    Toasts.showToast(PreviewActivity.this, R.string.not_selector_video_and_image);
+                    return;
+                } else if (checkMedia.mediaType == MediaFile.TYPE_VIDEO && DataUtils.getListSize(mMediaFileData) >= mMediaOption.maxSelectorVideoCount) {
+                    Toasts.showToast(PreviewActivity.this, R.string.max_selector_video_count, mMediaOption.maxSelectorVideoCount);
+                    return;
+                }
+            }
             mCheckMediaFileData.add(mediaFile);
         }
         mCheckMediaAdapter.notifyDataChange(mPreviewPosition);
+
     }
 
     /**

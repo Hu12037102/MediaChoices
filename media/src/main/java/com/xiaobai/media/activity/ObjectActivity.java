@@ -125,6 +125,7 @@ public abstract class ObjectActivity extends PermissionActivity {
     public void clickResultMediaData(ArrayList<MediaFile> checkMediaFileData) {
         if (!DataUtils.isListEmpty(checkMediaFileData) && mMediaOption != null) {
             if (mMediaOption.isCompress) {
+                Log.w("clickResultMediaData--", checkMediaFileData.size() + "--");
                 for (int i = 0; i < checkMediaFileData.size(); i++) {
                     int index = i;
                     MediaFile mediaFile = checkMediaFileData.get(i);
@@ -156,11 +157,6 @@ public abstract class ObjectActivity extends PermissionActivity {
                         String[] complexCommand = new String[]{"ffmpeg", "-i", mediaFile.filePath, "-s",
                                 mediaFile.width > mediaFile.height ? "960*540" : "540*960", "-c:v",
                                 "libx264", "-crf", "30", "-preset", "ultrafast", "-y", "-acodec", "libmp3lame", compressPath};
-
-                      /*  {"ffmpeg", "-i", filePath, "-s",
-                                resource.getWidth() > resource.getHeight() ? "960*540" : "540*960", "-c:v",
-                                "libx264", "-crf", "30", "-preset", "ultrafast", "-y", "-acodec", "libmp3lame", compressVideoPath};*/
-
                         RxFFmpegInvoke.getInstance().runCommandRxJava(complexCommand)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
@@ -176,17 +172,11 @@ public abstract class ObjectActivity extends PermissionActivity {
                                         Log.w("clickResultMediaData--", "onFinish:" + mediaFile.fileCompressPath);
                                     }
 
-                                   /* @Override
-                                    public void onProgress(int progress, long progressTime) {
-                                        Log.w("clickResultMediaData--", "onProgress:" + progress);
-                                    }*/
 
                                     @Override
-                                    public void onProgress(int progress) {
-
+                                    public void onProgress(int progress, long progressTime) {
+                                        Log.w("clickResultMediaData--", "onProgress:" + progress + "--" + progressTime);
                                     }
-
-
 
                                     @Override
                                     public void onCancel() {
@@ -207,7 +197,7 @@ public abstract class ObjectActivity extends PermissionActivity {
 
     }
 
-    private void resultMediaData(ArrayList<MediaFile> checkMediaFileData) {
+    protected void resultMediaData(ArrayList<MediaFile> checkMediaFileData) {
         Intent intent = new Intent();
         intent.putParcelableArrayListExtra(MediaSelector.KEY_PARCELABLE_MEDIA_DATA, checkMediaFileData);
         setResult(Activity.RESULT_OK, intent);

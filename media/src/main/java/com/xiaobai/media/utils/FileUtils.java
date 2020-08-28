@@ -50,7 +50,10 @@ public class FileUtils {
 
 
     private static void mkdirsDirector(File director) {
-        if (director != null && director.isDirectory()) {
+        if (director == null) {
+            return;
+        }
+        if (!director.isDirectory()) {
             director.mkdirs();
         }
     }

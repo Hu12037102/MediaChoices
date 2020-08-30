@@ -15,4 +15,5 @@
     <string name="complete">完成</string>
     <string name="complete_s">完成%s/%s</string>
     <string name="preview_index_s">（%s/%s）</string>
+    <string name="please_compress_media_wait">正在压缩媒体文件！</string>
 </resources>

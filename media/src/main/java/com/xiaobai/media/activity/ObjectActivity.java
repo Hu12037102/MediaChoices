@@ -12,10 +12,8 @@ import android.widget.TextView;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import com.bumptech.glide.Glide;
 import com.xiaobai.media.BuildConfig;
 import com.xiaobai.media.MediaSelector;
 import com.xiaobai.media.R;
@@ -23,11 +21,11 @@ import com.xiaobai.media.bean.MediaFile;
 import com.xiaobai.media.permission.PermissionActivity;
 import com.xiaobai.media.utils.DataUtils;
 import com.xiaobai.media.utils.FileUtils;
+import com.xiaobai.media.weight.Toasts;
 import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import io.microshow.rxffmpeg.RxFFmpegInvoke;
@@ -48,6 +46,7 @@ public abstract class ObjectActivity extends PermissionActivity {
     public static final String KEY_INDEX_CHECK_POSITION = "key_index_check_position";
     public static final String KEY_MEDIA_OPTION = "key_media_option";
     protected MediaSelector.MediaOption mMediaOption;
+    protected boolean mIsRunCompressMedia;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -125,6 +124,11 @@ public abstract class ObjectActivity extends PermissionActivity {
     public void clickResultMediaData(ArrayList<MediaFile> checkMediaFileData) {
         if (!DataUtils.isListEmpty(checkMediaFileData) && mMediaOption != null) {
             if (mMediaOption.isCompress) {
+                if (mIsRunCompressMedia) {
+                    Toasts.showToast(this, R.string.please_compress_media_wait);
+                    return;
+                }
+                mIsRunCompressMedia = true;
                 Log.w("clickResultMediaData--", checkMediaFileData.size() + "--");
                 for (int i = 0; i < checkMediaFileData.size(); i++) {
                     int index = i;
@@ -136,18 +140,22 @@ public abstract class ObjectActivity extends PermissionActivity {
                         CompressImageTask.get().compressImage(imageConfig, new CompressImageTask.OnImageResult() {
                             @Override
                             public void startCompress() {
-
+                                mIsRunCompressMedia = true;
                             }
 
                             @Override
                             public void resultFileSucceed(File file) {
                                 mediaFile.fileCompressPath = file.getAbsolutePath();
-                                resultMediaData(checkMediaFileData);
+                                if (index == checkMediaFileData.size() -1){
+                                    mIsRunCompressMedia = false;
+                                    resultMediaData(checkMediaFileData);
+                                }
+
                             }
 
                             @Override
                             public void resultFileError() {
-
+                                mIsRunCompressMedia = true;
                             }
                         });
                     } else if (FileUtils.isVideoMinType(mediaFile.filePath)) {
@@ -163,9 +171,9 @@ public abstract class ObjectActivity extends PermissionActivity {
                                 .subscribe(new RxFFmpegSubscriber() {
                                     @Override
                                     public void onFinish() {
-
                                         mediaFile.fileCompressPath = compressPath;
                                         if (index == checkMediaFileData.size() - 1) {
+                                            mIsRunCompressMedia = false;
                                             resultMediaData(checkMediaFileData);
 
                                         }
@@ -175,17 +183,20 @@ public abstract class ObjectActivity extends PermissionActivity {
 
                                     @Override
                                     public void onProgress(int progress, long progressTime) {
+                                        mIsRunCompressMedia = true;
                                         Log.w("clickResultMediaData--", "onProgress:" + progress + "--" + progressTime);
                                     }
 
                                     @Override
                                     public void onCancel() {
                                         Log.w("clickResultMediaData--", "onCancel:");
+                                        mIsRunCompressMedia = false;
                                     }
 
                                     @Override
                                     public void onError(String message) {
                                         Log.w("clickResultMediaData--", "onError:");
+                                        mIsRunCompressMedia = true;
                                     }
                                 });
                     }

@@ -47,6 +47,7 @@ public abstract class ObjectActivity extends PermissionActivity {
     public static final String KEY_MEDIA_OPTION = "key_media_option";
     protected MediaSelector.MediaOption mMediaOption;
     protected boolean mIsRunCompressMedia;
+    protected ArrayList<MediaFile> mCheckMediaData;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -99,6 +100,7 @@ public abstract class ObjectActivity extends PermissionActivity {
         options.setCompressionQuality(100);
         options.setToolbarColor(ContextCompat.getColor(activity, R.color.colorTheme));
         options.setStatusBarColor(ContextCompat.getColor(activity, R.color.colorBlack));
+        options.setActiveControlsWidgetColor(ContextCompat.getColor(activity, R.color.colorAccent));
         options.setLogoColor(ContextCompat.getColor(activity, R.color.colorTheme));
         //   options.setActiveWidgetColor(ContextCompat.getColor(activity, R.color.colorClickButtonCenter));
         UCrop.of(Uri.fromFile(firstFile), Uri.fromFile(lastFile))
@@ -121,18 +123,24 @@ public abstract class ObjectActivity extends PermissionActivity {
         }
     }
 
-    public void clickResultMediaData(ArrayList<MediaFile> checkMediaFileData) {
-        if (!DataUtils.isListEmpty(checkMediaFileData) && mMediaOption != null) {
-            if (mMediaOption.isCompress) {
+    public void clickResultMediaData() {
+        if (!DataUtils.isListEmpty(mCheckMediaData) && mMediaOption != null) {
+            if (mMediaOption.isCrop) {
+                MediaFile mediaFile = mCheckMediaData.get(0);
+                File firstFile = new File(mediaFile.filePath);
+                File lastFile = FileUtils.createChildDirector(FileUtils.MEDIA_FOLDER, FileUtils.getRootFile(this));
+                lastFile = new File(lastFile, FileUtils.createImageName());
+                uCropImage(this, firstFile, lastFile, mMediaOption.cropScaleX, mMediaOption.cropScaleY, mMediaOption.cropWidth, mMediaOption.cropHeight);
+            } else if (mMediaOption.isCompress) {
                 if (mIsRunCompressMedia) {
                     Toasts.showToast(this, R.string.please_compress_media_wait);
                     return;
                 }
                 mIsRunCompressMedia = true;
-                Log.w("clickResultMediaData--", checkMediaFileData.size() + "--");
-                for (int i = 0; i < checkMediaFileData.size(); i++) {
+                Log.w("clickResultMediaData--", mCheckMediaData.size() + "--");
+                for (int i = 0; i < mCheckMediaData.size(); i++) {
                     int index = i;
-                    MediaFile mediaFile = checkMediaFileData.get(i);
+                    MediaFile mediaFile = mCheckMediaData.get(i);
                     if (FileUtils.isImageMinType(mediaFile.filePath)) {
                         File compressFile = FileUtils.createChildDirector(FileUtils.MEDIA_FOLDER, FileUtils.getRootFile(this));
                         compressFile = new File(compressFile, FileUtils.createImageName());
@@ -146,9 +154,9 @@ public abstract class ObjectActivity extends PermissionActivity {
                             @Override
                             public void resultFileSucceed(File file) {
                                 mediaFile.fileCompressPath = file.getAbsolutePath();
-                                if (index == checkMediaFileData.size() -1){
+                                if (index == mCheckMediaData.size() - 1) {
                                     mIsRunCompressMedia = false;
-                                    resultMediaData(checkMediaFileData);
+                                    resultMediaData();
                                 }
 
                             }
@@ -172,9 +180,9 @@ public abstract class ObjectActivity extends PermissionActivity {
                                     @Override
                                     public void onFinish() {
                                         mediaFile.fileCompressPath = compressPath;
-                                        if (index == checkMediaFileData.size() - 1) {
+                                        if (index == mCheckMediaData.size() - 1) {
                                             mIsRunCompressMedia = false;
-                                            resultMediaData(checkMediaFileData);
+                                            resultMediaData();
 
                                         }
                                         Log.w("clickResultMediaData--", "onFinish:" + mediaFile.fileCompressPath);
@@ -202,18 +210,30 @@ public abstract class ObjectActivity extends PermissionActivity {
                     }
                 }
             } else {
-                resultMediaData(checkMediaFileData);
+                resultMediaData();
             }
         }
 
     }
 
-    protected void resultMediaData(ArrayList<MediaFile> checkMediaFileData) {
+    protected void resultMediaData() {
         Intent intent = new Intent();
-        intent.putParcelableArrayListExtra(MediaSelector.KEY_PARCELABLE_MEDIA_DATA, checkMediaFileData);
+        intent.putParcelableArrayListExtra(MediaSelector.KEY_PARCELABLE_MEDIA_DATA, mCheckMediaData);
         setResult(Activity.RESULT_OK, intent);
         finish();
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
+            final Uri resultUri = UCrop.getOutput(data);
+            if (resultUri != null && resultUri.getPath() != null) {
 
+            }
+            Log.w("onActivityResult--", resultUri.getPath() + "--");
+        } else if (resultCode == UCrop.RESULT_ERROR) {
+            final Throwable cropError = UCrop.getError(data);
+        }
+    }
 }

@@ -41,7 +41,6 @@ public class PreviewActivity extends ObjectActivity {
     private TitleView mTopTitleView, mBottomTitleView;
     private ViewPager2 mVpContent;
     private List<MediaFile> mMediaFileData;
-    private ArrayList<MediaFile> mCheckMediaFileData;
     private int mPreviewPosition;
     private PreviewMediaAdapter mPreviewAdapter;
     private boolean mIsOpenAnimation;
@@ -86,7 +85,7 @@ public class PreviewActivity extends ObjectActivity {
             mMediaFileData = new ArrayList<>();
         }
         Intent intent = getIntent();
-        mCheckMediaFileData = intent.getParcelableArrayListExtra(ObjectActivity.KEY_PARCELABLE_LIST_CHECK_DATA);
+        mCheckMediaData = intent.getParcelableArrayListExtra(ObjectActivity.KEY_PARCELABLE_LIST_CHECK_DATA);
         mPreviewPosition = intent.getIntExtra(ObjectActivity.KEY_INDEX_CHECK_POSITION, 0);
         mMediaOption = intent.getParcelableExtra(ObjectActivity.KEY_MEDIA_OPTION);
         Log.w("PreviewActivity--", mPreviewPosition + "--");
@@ -94,7 +93,7 @@ public class PreviewActivity extends ObjectActivity {
 
 
     private void initPreview() {
-        updateTitleSureText(mTopTitleView.mTvSure, mCheckMediaFileData, mMediaOption.maxSelectorMediaCount);
+        updateTitleSureText(mTopTitleView.mTvSure, mCheckMediaData, mMediaOption.maxSelectorMediaCount);
 
         mPreviewAdapter = new PreviewMediaAdapter(this, mMediaFileData);
         mVpContent.setAdapter(mPreviewAdapter);
@@ -106,7 +105,7 @@ public class PreviewActivity extends ObjectActivity {
     }
 
     private void initCheckMedia() {
-        mCheckMediaAdapter = new PreviewCheckMediaAdapter(this, mCheckMediaFileData, mMediaFileData, mPreviewPosition);
+        mCheckMediaAdapter = new PreviewCheckMediaAdapter(this, mCheckMediaData, mMediaFileData, mPreviewPosition);
         mRvCheck.setAdapter(mCheckMediaAdapter);
     }
 
@@ -130,7 +129,7 @@ public class PreviewActivity extends ObjectActivity {
         mTopTitleView.setOnSureViewClickListener(new TitleView.OnSureViewClickListener() {
             @Override
             public void onSureClick(@NonNull View view) {
-                clickResultMediaData(mCheckMediaFileData);
+                clickResultMediaData();
             }
         });
         mTopTitleView.setOnBackViewClickListener(new TitleView.OnBackViewClickListener() {
@@ -145,7 +144,7 @@ public class PreviewActivity extends ObjectActivity {
 
                 updateCheckMediaData();
                 updateCheckView();
-                updateTitleSureText(mTopTitleView.mTvSure, mCheckMediaFileData, mMediaOption.maxSelectorMediaCount);
+                updateTitleSureText(mTopTitleView.mTvSure, mCheckMediaData, mMediaOption.maxSelectorMediaCount);
             }
         });
         mVpContent.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
@@ -162,7 +161,7 @@ public class PreviewActivity extends ObjectActivity {
         mCheckMediaAdapter.setOnClickItemListener(new PreviewCheckMediaAdapter.OnClickItemListener() {
             @Override
             public void onClickItemView(@NonNull View view, int position) {
-                MediaFile checkMediaFile = mCheckMediaFileData.get(position);
+                MediaFile checkMediaFile = mCheckMediaData.get(position);
                 if (mMediaFileData.contains(checkMediaFile)) {
                     mVpContent.setCurrentItem(mMediaFileData.indexOf(checkMediaFile), false);
                 }
@@ -175,14 +174,14 @@ public class PreviewActivity extends ObjectActivity {
      */
     public void updateCheckMediaData() {
         MediaFile mediaFile = mMediaFileData.get(mPreviewPosition);
-        if (mCheckMediaFileData.contains(mediaFile)) {
-            mCheckMediaFileData.remove(mediaFile);
+        if (mCheckMediaData.contains(mediaFile)) {
+            mCheckMediaData.remove(mediaFile);
         } else {
-            if (DataUtils.getListSize(mCheckMediaFileData) >= mMediaOption.maxSelectorMediaCount) {
+            if (DataUtils.getListSize(mCheckMediaData) >= mMediaOption.maxSelectorMediaCount) {
                 Toasts.showToast(PreviewActivity.this, R.string.max_selector_media_count, mMediaOption.maxSelectorMediaCount);
                 return;
-            } else if (!mMediaOption.isSelectorMultiple && DataUtils.getListSize(mCheckMediaFileData) >= 1) {
-                MediaFile checkMedia = mCheckMediaFileData.get(0);
+            } else if (!mMediaOption.isSelectorMultiple && DataUtils.getListSize(mCheckMediaData) >= 1) {
+                MediaFile checkMedia = mCheckMediaData.get(0);
                 if (mediaFile.mediaType != checkMedia.mediaType) {
                     Toasts.showToast(PreviewActivity.this, R.string.not_selector_video_and_image);
                     return;
@@ -191,7 +190,7 @@ public class PreviewActivity extends ObjectActivity {
                     return;
                 }
             }
-            mCheckMediaFileData.add(mediaFile);
+            mCheckMediaData.add(mediaFile);
         }
         mCheckMediaAdapter.notifyDataChange(mPreviewPosition);
 
@@ -210,7 +209,7 @@ public class PreviewActivity extends ObjectActivity {
      * 更新BottomTitleView是不是被选中状态
      */
     public void updateCheckView() {
-        if (mCheckMediaFileData.contains(mMediaFileData.get(mPreviewPosition))) {
+        if (mCheckMediaData.contains(mMediaFileData.get(mPreviewPosition))) {
             mBottomTitleView.mTvSure.setCompoundDrawablesWithIntrinsicBounds(R.mipmap.icon_media_check, 0, 0, 0);
         } else {
             mBottomTitleView.mTvSure.setCompoundDrawablesWithIntrinsicBounds(R.mipmap.icon_media_default, 0, 0, 0);
@@ -266,7 +265,7 @@ public class PreviewActivity extends ObjectActivity {
 
     private void clickBackForResult() {
         Intent intent = new Intent();
-        intent.putParcelableArrayListExtra(ObjectActivity.KEY_PARCELABLE_LIST_CHECK_DATA, mCheckMediaFileData);
+        intent.putParcelableArrayListExtra(ObjectActivity.KEY_PARCELABLE_LIST_CHECK_DATA, mCheckMediaData);
         setResult(PreviewActivity.RESULT_CODE_BACK, intent);
     }
 

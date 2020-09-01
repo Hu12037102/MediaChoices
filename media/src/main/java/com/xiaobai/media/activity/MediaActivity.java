@@ -42,7 +42,7 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
     FolderPopupWindow mFolderPopupWindow;
     private List<MediaFile> mMediaFileData;
     private MediaFileAdapter mMediaFileAdapter;
-    private ArrayList<MediaFile> mCheckMediaData;
+
     public static final int REQUEST_CODE_PREVIEW = 1235;
     private TitleView mTitleViewBottom;
 
@@ -116,7 +116,7 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
         mTitleViewTop.setOnSureViewClickListener(new TitleView.OnSureViewClickListener() {
             @Override
             public void onSureClick(@NonNull View view) {
-                clickResultMediaData(mCheckMediaData);
+                clickResultMediaData();
             }
         });
         mTitleViewBottom.setOnTitleViewClickListener(new TitleView.OnTitleViewClickListener() {
@@ -232,7 +232,7 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
                 ArrayList<MediaFile> checkMediaFile = data.getParcelableArrayListExtra(MediaSelector.KEY_PARCELABLE_MEDIA_DATA);
                 if (!DataUtils.isListEmpty(checkMediaFile)) {
                     // clickResultMediaData(checkMediaFile);
-                    resultMediaData(checkMediaFile);
+                    resultMediaData();
                 }
                 //当从上一个页面返回时候回调（非点击完成按钮）
             } else if (resultCode == PreviewActivity.RESULT_CODE_BACK) {

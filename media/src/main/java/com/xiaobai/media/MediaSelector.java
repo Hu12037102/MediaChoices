@@ -102,7 +102,7 @@ public class MediaSelector {
         public int cropScaleX = 1;
         public int cropScaleY = 1;
         public int cropWidth = 720;
-        public int cropSHeight = 720;
+        public int cropHeight = 720;
         public int mediaType = MediaOption.MEDIA_IMAGE;
         public ArrayList<MediaFile> selectorFileData = new ArrayList<>();
         public int maxSelectorVideoCount = MediaSelector.SELECTOR_MAX_VIDEO_COUNT;
@@ -116,7 +116,7 @@ public class MediaSelector {
             cropScaleX = in.readInt();
             cropScaleY = in.readInt();
             cropWidth = in.readInt();
-            cropSHeight = in.readInt();
+            cropHeight = in.readInt();
             mediaType = in.readInt();
             selectorFileData = in.createTypedArrayList(MediaFile.CREATOR);
         }
@@ -149,7 +149,7 @@ public class MediaSelector {
             dest.writeInt(cropScaleX);
             dest.writeInt(cropScaleY);
             dest.writeInt(cropWidth);
-            dest.writeInt(cropSHeight);
+            dest.writeInt(cropHeight);
             dest.writeInt(mediaType);
             dest.writeTypedList(selectorFileData);
         }

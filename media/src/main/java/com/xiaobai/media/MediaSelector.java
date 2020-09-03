@@ -27,7 +27,7 @@ public class MediaSelector {
     private WeakReference<Fragment> mSoftFragment;
     private WeakReference<Activity> mSoftActivity;
     private static final int SELECTOR_MAX_MEDIA_COUNT = 9;
-    private static final int SELECTOR_MAX_VIDEO_COUNT = 1;
+    private static final int SELECTOR_MAX_VIDEO_COUNT = 5;
     public static final String KEY_PARCELABLE_MEDIA_DATA = "key_parcelable_media_data";
 
     public static final String KEY_MEDIA_OPTION = "key_media_option";
@@ -73,7 +73,7 @@ public class MediaSelector {
         List<MediaFile> resultData = new ArrayList<>();
         if (intent != null) {
             List<MediaFile> data = intent.getParcelableArrayListExtra(MediaSelector.KEY_PARCELABLE_MEDIA_DATA);
-            if (DataUtils.getListSize(data) > 0) {
+            if (data != null && DataUtils.getListSize(data) > 0) {
                 resultData.addAll(data);
             }
         }
@@ -96,7 +96,7 @@ public class MediaSelector {
         public int maxSelectorMediaCount = MediaSelector.SELECTOR_MAX_MEDIA_COUNT;
         public boolean isCompress = true;
         public boolean isShowCamera;
-        //是不是选择多个
+        //是不是选择多个类型
         public boolean isSelectorMultiple;
         public boolean isCrop;
         public int cropScaleX = 1;
@@ -106,6 +106,7 @@ public class MediaSelector {
         public int mediaType = MediaOption.MEDIA_IMAGE;
         public ArrayList<MediaFile> selectorFileData = new ArrayList<>();
         public int maxSelectorVideoCount = MediaSelector.SELECTOR_MAX_VIDEO_COUNT;
+
 
         protected MediaOption(Parcel in) {
             maxSelectorMediaCount = in.readInt();
@@ -119,6 +120,7 @@ public class MediaSelector {
             cropHeight = in.readInt();
             mediaType = in.readInt();
             selectorFileData = in.createTypedArrayList(MediaFile.CREATOR);
+            maxSelectorVideoCount = in.readInt();
         }
 
         public static final Creator<MediaOption> CREATOR = new Creator<MediaOption>() {
@@ -132,7 +134,6 @@ public class MediaSelector {
                 return new MediaOption[size];
             }
         };
-
 
         @Override
         public int describeContents() {
@@ -152,6 +153,7 @@ public class MediaSelector {
             dest.writeInt(cropHeight);
             dest.writeInt(mediaType);
             dest.writeTypedList(selectorFileData);
+            dest.writeInt(maxSelectorVideoCount);
         }
     }
 

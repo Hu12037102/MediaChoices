@@ -127,10 +127,15 @@ public abstract class ObjectActivity extends PermissionActivity {
         if (!DataUtils.isListEmpty(mCheckMediaData) && mMediaOption != null) {
             if (mMediaOption.isCrop) {
                 MediaFile mediaFile = mCheckMediaData.get(0);
-                File firstFile = new File(mediaFile.filePath);
-                File lastFile = FileUtils.createChildDirector(FileUtils.MEDIA_FOLDER, FileUtils.getRootFile(this));
-                lastFile = new File(lastFile, FileUtils.createImageName());
-                uCropImage(this, firstFile, lastFile, mMediaOption.cropScaleX, mMediaOption.cropScaleY, mMediaOption.cropWidth, mMediaOption.cropHeight);
+                if (mediaFile.mediaType == MediaFile.TYPE_IMAGE) {
+                    File firstFile = new File(mediaFile.filePath);
+                    File lastFile = FileUtils.createChildDirector(FileUtils.MEDIA_FOLDER, FileUtils.getRootFile(this));
+                    lastFile = new File(lastFile, FileUtils.createImageName());
+                    uCropImage(this, firstFile, lastFile, mMediaOption.cropScaleX, mMediaOption.cropScaleY, mMediaOption.cropWidth, mMediaOption.cropHeight);
+                } else {
+                    Toasts.showToast(this, R.string.video_not_can_crop);
+                }
+
             } else if (mMediaOption.isCompress) {
                 if (mIsRunCompressMedia) {
                     Toasts.showToast(this, R.string.please_compress_media_wait);
@@ -173,6 +178,7 @@ public abstract class ObjectActivity extends PermissionActivity {
                         String[] complexCommand = new String[]{"ffmpeg", "-i", mediaFile.filePath, "-s",
                                 mediaFile.width > mediaFile.height ? "1280*720" : "720*1280", "-c:v",
                                 "libx264", "-crf", "30", "-preset", "ultrafast", "-y", "-acodec", "libmp3lame", compressPath};
+                        RxFFmpegInvoke.getInstance().exit();
                         RxFFmpegInvoke.getInstance().runCommandRxJava(complexCommand)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
@@ -235,5 +241,9 @@ public abstract class ObjectActivity extends PermissionActivity {
         } else if (resultCode == UCrop.RESULT_ERROR) {
             final Throwable cropError = UCrop.getError(data);
         }
+    }
+
+    public void openCamera() {
+
     }
 }

@@ -100,10 +100,44 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
                 if (mCheckMediaData.contains(mediaFile)) {
                     mCheckMediaData.remove(mediaFile);
                     if (onClickMediaListener != null) {
-                        onClickMediaListener.onCheckMediaChange(v, finalPosition,false);
+                        onClickMediaListener.onCheckMediaChange(v, finalPosition, false);
                     }
                 } else {
                     if (DataUtils.getListSize(mCheckMediaData) >= mOption.maxSelectorMediaCount) {
+                        Toasts.showToast(mContext.getApplicationContext(), R.string.max_selector_media_count, mOption.maxSelectorMediaCount);
+                        return;
+                    } else {
+                        //能不能混合选择
+                        if (mOption.isSelectorMultiple) {
+                            int videoCount = DataUtils.getCheckMediaTypeSize(mCheckMediaData, MediaFile.TYPE_VIDEO);
+                            if (videoCount >= mOption.maxSelectorVideoCount && mediaFile.mediaType == MediaFile.TYPE_VIDEO) {
+                                Toasts.showToast(mContext, R.string.max_selector_video_count, mOption.maxSelectorVideoCount);
+                                return;
+
+                            }
+                        } else {
+                            if (DataUtils.getListSize(mCheckMediaData) > 0) {
+                                MediaFile checkMedia = mCheckMediaData.get(0);
+                                if (mediaFile.mediaType != checkMedia.mediaType) {
+                                    Toasts.showToast(mContext, R.string.not_selector_video_and_image);
+                                    return;
+                                } else {
+                                    int videoCount = DataUtils.getCheckMediaTypeSize(mCheckMediaData, MediaFile.TYPE_VIDEO);
+                                    if (videoCount >= mOption.maxSelectorVideoCount) {
+                                        Toasts.showToast(mContext, R.string.max_selector_video_count, mOption.maxSelectorVideoCount);
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                        mCheckMediaData.add(mediaFile);
+                        if (onClickMediaListener != null) {
+                            onClickMediaListener.onCheckMediaChange(v, finalPosition, true);
+                        }
+                    }
+
+
+                   /* if (DataUtils.getListSize(mCheckMediaData) >= mOption.maxSelectorMediaCount) {
                         Toasts.showToast(mContext.getApplicationContext(), R.string.max_selector_media_count, mOption.maxSelectorMediaCount);
                         return;
                     } else if (!mOption.isSelectorMultiple && DataUtils.getListSize(mCheckMediaData) >= 1) {
@@ -119,8 +153,8 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
                     }
                     mCheckMediaData.add(mediaFile);
                     if (onClickMediaListener != null) {
-                        onClickMediaListener.onCheckMediaChange(v, finalPosition,true);
-                    }
+                        onClickMediaListener.onCheckMediaChange(v, finalPosition, true);
+                    }*/
                 }
                 notifyDataSetChanged();
             });

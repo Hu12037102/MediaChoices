@@ -2,6 +2,8 @@ package com.xiaobai.media.utils;
 
 import android.text.TextUtils;
 
+import com.xiaobai.media.bean.MediaFile;
+
 import java.util.List;
 
 /**
@@ -21,7 +23,22 @@ public class DataUtils {
         }
         return list.size();
     }
-    public static boolean isEmpty(CharSequence charSequence){
+
+    public static boolean isEmpty(CharSequence charSequence) {
         return TextUtils.isEmpty(charSequence);
     }
+
+    public static int getCheckMediaTypeSize(List<MediaFile> checkMediaData, int mediaType) {
+        int count = 0;
+        if (DataUtils.isListEmpty(checkMediaData)) {
+            return count;
+        }
+        for (MediaFile mediaFile : checkMediaData) {
+            if (mediaFile.mediaType == mediaType) {
+                count++;
+            }
+        }
+        return count;
+    }
+
 }

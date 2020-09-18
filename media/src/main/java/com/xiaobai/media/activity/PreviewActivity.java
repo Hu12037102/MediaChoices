@@ -180,13 +180,11 @@ public class PreviewActivity extends ObjectActivity {
             if (DataUtils.getListSize(mCheckMediaData) >= mMediaOption.maxSelectorMediaCount) {
                 Toasts.showToast(PreviewActivity.this, R.string.max_selector_media_count, mMediaOption.maxSelectorMediaCount);
                 return;
-            } else if (!mMediaOption.isSelectorMultiple && DataUtils.getListSize(mCheckMediaData) >= 1) {
+            }
+            if (DataUtils.getListSize(mCheckMediaData) > 0) {
                 MediaFile checkMedia = mCheckMediaData.get(0);
-                if (mediaFile.mediaType != checkMedia.mediaType) {
-                    Toasts.showToast(PreviewActivity.this, R.string.not_selector_video_and_image);
-                    return;
-                } else if (checkMedia.mediaType == MediaFile.TYPE_VIDEO && DataUtils.getListSize(mMediaFileData) >= mMediaOption.maxSelectorVideoCount) {
-                    Toasts.showToast(PreviewActivity.this, R.string.max_selector_video_count, mMediaOption.maxSelectorVideoCount);
+                if (checkMedia.mediaType == MediaFile.TYPE_VIDEO) {
+                    Toasts.showToast(this, R.string.video_max_selector_one);
                     return;
                 }
             }

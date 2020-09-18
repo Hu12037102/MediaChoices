@@ -167,7 +167,7 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, T>
                     }
                 }
             });
-        } else if (getItemViewType(i) == 0) {
+        } else{
             if (isHaveHeadView) {
                 i--;
             }

@@ -40,13 +40,7 @@
         app:layout_constraintLeft_toLeftOf="@id/cb_crop"
         app:layout_constraintTop_toBottomOf="@id/cb_crop" />
 
-    <CheckBox
-        android:id="@+id/cb_multiple"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="视频图片混合选择"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/act_count" />
+
 
     <CheckBox
         android:id="@+id/cb_camera"
@@ -54,7 +48,7 @@
         android:layout_height="wrap_content"
         android:text="要不要显示拍照"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cb_multiple" />
+        app:layout_constraintTop_toBottomOf="@id/act_count" />
 
     <CheckBox
         android:id="@+id/cb_video"

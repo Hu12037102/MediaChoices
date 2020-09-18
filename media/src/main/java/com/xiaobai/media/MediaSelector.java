@@ -27,7 +27,6 @@ public class MediaSelector {
     private WeakReference<Fragment> mSoftFragment;
     private WeakReference<Activity> mSoftActivity;
     private static final int SELECTOR_MAX_MEDIA_COUNT = 9;
-    private static final int SELECTOR_MAX_VIDEO_COUNT = 5;
     public static final String KEY_PARCELABLE_MEDIA_DATA = "key_parcelable_media_data";
 
     public static final String KEY_MEDIA_OPTION = "key_media_option";
@@ -96,8 +95,6 @@ public class MediaSelector {
         public int maxSelectorMediaCount = MediaSelector.SELECTOR_MAX_MEDIA_COUNT;
         public boolean isCompress = true;
         public boolean isShowCamera;
-        //是不是选择多个类型
-        public boolean isSelectorMultiple;
         public boolean isCrop;
         public int cropScaleX = 1;
         public int cropScaleY = 1;
@@ -105,14 +102,12 @@ public class MediaSelector {
         public int cropHeight = 720;
         public int mediaType = MediaOption.MEDIA_IMAGE;
         public ArrayList<MediaFile> selectorFileData = new ArrayList<>();
-        public int maxSelectorVideoCount = MediaSelector.SELECTOR_MAX_VIDEO_COUNT;
 
 
         protected MediaOption(Parcel in) {
             maxSelectorMediaCount = in.readInt();
             isCompress = in.readByte() != 0;
             isShowCamera = in.readByte() != 0;
-            isSelectorMultiple = in.readByte() != 0;
             isCrop = in.readByte() != 0;
             cropScaleX = in.readInt();
             cropScaleY = in.readInt();
@@ -120,7 +115,6 @@ public class MediaSelector {
             cropHeight = in.readInt();
             mediaType = in.readInt();
             selectorFileData = in.createTypedArrayList(MediaFile.CREATOR);
-            maxSelectorVideoCount = in.readInt();
         }
 
         public static final Creator<MediaOption> CREATOR = new Creator<MediaOption>() {
@@ -145,7 +139,6 @@ public class MediaSelector {
             dest.writeInt(maxSelectorMediaCount);
             dest.writeByte((byte) (isCompress ? 1 : 0));
             dest.writeByte((byte) (isShowCamera ? 1 : 0));
-            dest.writeByte((byte) (isSelectorMultiple ? 1 : 0));
             dest.writeByte((byte) (isCrop ? 1 : 0));
             dest.writeInt(cropScaleX);
             dest.writeInt(cropScaleY);
@@ -153,7 +146,6 @@ public class MediaSelector {
             dest.writeInt(cropHeight);
             dest.writeInt(mediaType);
             dest.writeTypedList(selectorFileData);
-            dest.writeInt(maxSelectorVideoCount);
         }
     }
 

@@ -30,7 +30,6 @@ public class MainActivity extends PermissionActivity implements CompoundButton.O
     private CheckBox mCbCompress;
     private CheckBox mCbCrop;
     private AppCompatEditText mAetCount;
-    private CheckBox mCbMultiple;
     private CheckBox mCbCamera;
     private CheckBox mCbVideo;
     private Button mBtnMedia;
@@ -76,7 +75,6 @@ public class MainActivity extends PermissionActivity implements CompoundButton.O
         mCbCompress = findViewById(R.id.cb_compress);
         mCbCrop = findViewById(R.id.cb_crop);
         mAetCount = findViewById(R.id.act_count);
-        mCbMultiple = findViewById(R.id.cb_multiple);
         mCbCamera = findViewById(R.id.cb_camera);
         mCbVideo = findViewById(R.id.cb_video);
         mBtnMedia = findViewById(R.id.btn_media);
@@ -92,7 +90,6 @@ public class MainActivity extends PermissionActivity implements CompoundButton.O
     private void initEvent() {
         mCbCompress.setOnCheckedChangeListener(this);
         mCbCrop.setOnCheckedChangeListener(this);
-        mCbMultiple.setOnCheckedChangeListener(this);
         mCbCamera.setOnCheckedChangeListener(this);
         mCbVideo.setOnCheckedChangeListener(this);
         mBtnMedia.setOnClickListener(new View.OnClickListener() {
@@ -114,9 +111,7 @@ public class MainActivity extends PermissionActivity implements CompoundButton.O
             case R.id.cb_crop:
                 mOption.isCrop = isChecked;
                 break;
-            case R.id.cb_multiple:
-                mOption.isSelectorMultiple = isChecked;
-                break;
+
             case R.id.cb_camera:
                 mOption.isShowCamera = isChecked;
                 break;

@@ -17,4 +17,5 @@
     <string name="preview_index_s">（%s/%s）</string>
     <string name="please_compress_media_wait">正在压缩媒体文件！</string>
     <string name="video_not_can_crop">视频不支持裁剪！</string>
+    <string name="video_max_selector_one">视频最大选择一张</string>
 </resources>

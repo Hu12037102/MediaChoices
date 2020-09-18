@@ -5,6 +5,7 @@
     android:layout_height="match_parent">
 
     <com.makeramen.roundedimageview.RoundedImageView
+        android:id="@+id/riv_camera"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:riv_oval="false"

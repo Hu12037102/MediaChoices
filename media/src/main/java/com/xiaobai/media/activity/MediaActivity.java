@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Parcelable;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -140,7 +141,7 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
 
             @Override
             public void onClickCamera(@NonNull View view, int position) {
-
+                Log.w("onClickCamera--","点击了选择相机");
             }
 
             @Override

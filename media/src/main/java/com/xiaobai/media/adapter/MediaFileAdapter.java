@@ -6,12 +6,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.makeramen.roundedimageview.RoundedImageView;
 import com.xiaobai.media.MediaSelector;
 import com.xiaobai.media.R;
 import com.xiaobai.media.activity.MediaActivity;
@@ -33,7 +35,7 @@ import java.util.List;
 public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolder, MediaFile> {
     private MediaSelector.MediaOption mOption;
     private List<MediaFile> mData;
-    private static final int TYPE_CAMERA = 1;
+    private static final int TYPE_CAMERA = 111;
     private List<MediaFile> mCheckMediaData;
 
 
@@ -59,12 +61,13 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
     }
 
 
+
     @Override
     protected void onBindViewDataHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof MediaCameraViewHolder) {
             MediaCameraViewHolder cameraViewHolder = (MediaCameraViewHolder) holder;
             int finalPosition = position;
-            cameraViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+            cameraViewHolder.mRivCamera.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (onClickMediaListener != null) {
@@ -106,55 +109,19 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
                     if (DataUtils.getListSize(mCheckMediaData) >= mOption.maxSelectorMediaCount) {
                         Toasts.showToast(mContext.getApplicationContext(), R.string.max_selector_media_count, mOption.maxSelectorMediaCount);
                         return;
-                    } else {
-                        //能不能混合选择
-                        if (mOption.isSelectorMultiple) {
-                            int videoCount = DataUtils.getCheckMediaTypeSize(mCheckMediaData, MediaFile.TYPE_VIDEO);
-                            if (videoCount >= mOption.maxSelectorVideoCount && mediaFile.mediaType == MediaFile.TYPE_VIDEO) {
-                                Toasts.showToast(mContext, R.string.max_selector_video_count, mOption.maxSelectorVideoCount);
-                                return;
-
-                            }
-                        } else {
-                            if (DataUtils.getListSize(mCheckMediaData) > 0) {
-                                MediaFile checkMedia = mCheckMediaData.get(0);
-                                if (mediaFile.mediaType != checkMedia.mediaType) {
-                                    Toasts.showToast(mContext, R.string.not_selector_video_and_image);
-                                    return;
-                                } else {
-                                    int videoCount = DataUtils.getCheckMediaTypeSize(mCheckMediaData, MediaFile.TYPE_VIDEO);
-                                    if (videoCount >= mOption.maxSelectorVideoCount) {
-                                        Toasts.showToast(mContext, R.string.max_selector_video_count, mOption.maxSelectorVideoCount);
-                                        return;
-                                    }
-                                }
-                            }
-                        }
-                        mCheckMediaData.add(mediaFile);
-                        if (onClickMediaListener != null) {
-                            onClickMediaListener.onCheckMediaChange(v, finalPosition, true);
-                        }
                     }
-
-
-                   /* if (DataUtils.getListSize(mCheckMediaData) >= mOption.maxSelectorMediaCount) {
-                        Toasts.showToast(mContext.getApplicationContext(), R.string.max_selector_media_count, mOption.maxSelectorMediaCount);
-                        return;
-                    } else if (!mOption.isSelectorMultiple && DataUtils.getListSize(mCheckMediaData) >= 1) {
+                    if (DataUtils.getListSize(mCheckMediaData) > 0) {
                         MediaFile checkMedia = mCheckMediaData.get(0);
-                        if (mediaFile.mediaType != checkMedia.mediaType) {
-                            Toasts.showToast(mContext, R.string.not_selector_video_and_image);
-                            return;
-                        } else if (checkMedia.mediaType == MediaFile.TYPE_VIDEO && DataUtils.getListSize(mCheckMediaData) >= mOption.maxSelectorVideoCount) {
-                            Toasts.showToast(mContext, R.string.max_selector_video_count, mOption.maxSelectorVideoCount);
+                        if (checkMedia.mediaType == MediaFile.TYPE_VIDEO) {
+                            Toasts.showToast(mContext, R.string.video_max_selector_one);
                             return;
                         }
-
                     }
                     mCheckMediaData.add(mediaFile);
                     if (onClickMediaListener != null) {
                         onClickMediaListener.onCheckMediaChange(v, finalPosition, true);
-                    }*/
+                    }
+
                 }
                 notifyDataSetChanged();
             });
@@ -234,12 +201,15 @@ public class MediaFileAdapter extends BaseRecyclerAdapter<RecyclerView.ViewHolde
     static class MediaCameraViewHolder extends RecyclerView.ViewHolder {
 
 
+        private RoundedImageView mRivCamera;
+
         public MediaCameraViewHolder(@NonNull View itemView) {
             super(itemView);
             initView(itemView);
         }
 
         private void initView(View itemView) {
+            mRivCamera = itemView.findViewById(R.id.riv_camera);
             MediaFileAdapter.setItemParams(itemView);
         }
     }

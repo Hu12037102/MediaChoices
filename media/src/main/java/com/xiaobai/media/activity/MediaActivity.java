@@ -3,7 +3,10 @@ package com.xiaobai.media.activity;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Parcelable;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 
@@ -20,11 +23,13 @@ import com.xiaobai.media.manger.ParcelableManger;
 import com.xiaobai.media.permission.imp.OnPermissionsResult;
 import com.xiaobai.media.resolver.MediaHelper;
 import com.xiaobai.media.utils.DataUtils;
+import com.xiaobai.media.utils.FileUtils;
 import com.xiaobai.media.weight.BaseRecyclerView;
 import com.xiaobai.media.weight.FolderPopupWindow;
 import com.xiaobai.media.weight.TitleView;
 import com.xiaobai.media.weight.Toasts;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +41,7 @@ import java.util.List;
  */
 public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback {
 
+    private static final int REQUEST_CODE_OPEN_CAMERA = 20000;
     private BaseRecyclerView mRvMediaFile;
     public static final int GRID_COUNT = 4;
     private TitleView mTitleViewTop;
@@ -46,6 +52,7 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
 
     public static final int REQUEST_CODE_PREVIEW = 1235;
     private TitleView mTitleViewBottom;
+    private File mCameraFile;
 
     @Override
     protected int getLayoutId() {
@@ -141,7 +148,14 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
 
             @Override
             public void onClickCamera(@NonNull View view, int position) {
-                Log.w("onClickCamera--","点击了选择相机");
+                Log.w("onClickCamera--", "点击了选择相机");
+                mCameraFile = new File(FileUtils.createChildDirector(FileUtils.MEDIA_FOLDER, FileUtils.getRootFile(MediaActivity.this)), FileUtils.createImageName());
+                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                cameraIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                cameraIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                Uri uri = FileUtils.fileToUri(MediaActivity.this, mCameraFile, getIntent());
+                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+                startActivityForResult(cameraIntent, MediaActivity.REQUEST_CODE_OPEN_CAMERA);
             }
 
             @Override
@@ -246,8 +260,19 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
                     mMediaFileAdapter.notifyDataSetChanged();
                 }
             }
+        } else if (requestCode == MediaActivity.REQUEST_CODE_OPEN_CAMERA) {
+            if (resultCode == Activity.RESULT_OK && FileUtils.existsFile(mCameraFile.getAbsolutePath())) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    Uri uri = FileUtils.insertImageUri(this, mCameraFile);
+                    FileUtils.savePublicFile(this, uri, mCameraFile);
+                } else {
+                    FileUtils.scanImage(this, mCameraFile);
+                }
+                MediaFile mediaFile = MediaFile.createMediaImageFile(mCameraFile.getAbsolutePath());
+                mCheckMediaData.add(mediaFile);
+                clickResultMediaData();
+                Log.w("onActivityResult--", "cameraFile:" + mCameraFile.getAbsolutePath());
+            }
         }
-
-
     }
 }

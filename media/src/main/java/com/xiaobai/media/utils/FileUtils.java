@@ -1,16 +1,34 @@
 package com.xiaobai.media.utils;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.FileProvider;
+
+import com.xiaobai.media.bean.MediaFile;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.FileNameMap;
 import java.net.URLConnection;
+import java.util.List;
 import java.util.UUID;
+
+import utils.MediaScanner;
 
 /**
  * 作者: 胡庆岭
@@ -171,4 +189,128 @@ public class FileUtils {
     public static String createVideoName() {
         return createFileHost() + ".mp4";
     }
+
+    public static Uri fileToUri(@NonNull Context context, @NonNull File file, @NonNull Intent intent) {
+        Uri uri;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            String authority = context.getPackageName() + ".provider";
+            uri = FileProvider.getUriForFile(context, authority, file);
+            List<ResolveInfo> resolveInfoData = context.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+            if (resolveInfoData.size() > 0)
+                for (ResolveInfo resolveInfo : resolveInfoData) {
+                    String packageName = resolveInfo.activityInfo.packageName;
+                    context.grantUriPermission(packageName, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                }
+        } else {
+            uri = Uri.fromFile(file);
+        }
+        return uri;
+    }
+
+    public static void scanImage(@NonNull Context context, @NonNull File file) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            MediaScanner ms = new MediaScanner(context, file);
+            ms.refresh();
+        } else {
+            Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+            intent.setData(Uri.fromFile(file));
+            context.sendBroadcast(intent);
+        }
+    }
+
+    public static Uri insertImageUri(@NonNull Context context, @NonNull File file) {
+        ContentResolver contentResolver = context.getContentResolver();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MediaStore.Images.Media.DESCRIPTION, "This is an image");
+        contentValues.put(MediaStore.Images.Media.DISPLAY_NAME, file.getName());
+        int[] size = getImageWidthHeight(file);
+        contentValues.put(MediaStore.Images.Media.WIDTH, size[0]);
+        contentValues.put(MediaStore.Images.Media.HEIGHT, size[1]);
+        contentValues.put(MediaStore.Images.Media.MIME_TYPE, getImageMinType(file));
+        contentValues.put(MediaStore.Images.Media.TITLE, file.getName());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            contentValues.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/" + FileUtils.MEDIA_FOLDER);
+        } else {
+            contentValues.put(MediaStore.Images.Media.DATA, file.getAbsolutePath());
+        }
+        return contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
+    }
+
+    public static int[] getImageWidthHeight(File file) {
+        int[] data = new int[2];
+        if (file != null && FileUtils.existsFile(file.getAbsolutePath())) {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inPreferredConfig = Bitmap.Config.RGB_565;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                options.outConfig = Bitmap.Config.RGB_565;
+            }
+            options.inJustDecodeBounds = true;
+            Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+            data[0] = options.outWidth;
+            data[1] = options.outHeight;
+            if (bitmap != null && !bitmap.isRecycled()) {
+                bitmap.recycle();
+            }
+        }
+
+        return data;
+    }
+
+    public static String getImageMinType(File file) {
+        if (file == null || !FileUtils.existsFile(file.getAbsolutePath())) {
+            return "";
+        }
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+        if (bitmap != null && !bitmap.isRecycled()) {
+            bitmap.recycle();
+        }
+        return options.outMimeType;
+    }
+
+    /**
+     * 把图片保存到共有库
+     *
+     * @param context
+     * @param uri
+     * @param file
+     */
+    public static void savePublicFile(@NonNull Context context, @NonNull Uri uri, @NonNull File file) {
+        OutputStream os = null;
+        FileInputStream fis = null;
+        try {
+            os = context.getContentResolver().openOutputStream(uri, "w");
+            if (file.exists() && file.isFile()) {
+                fis = new FileInputStream(file);
+                byte[] bytes = new byte[1024];
+                int read;
+                while ((read = fis.read(bytes)) != -1) {
+                    if (os != null) {
+                        os.write(bytes, 0, read);
+                        os.flush();
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (os != null) {
+                try {
+                    os.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+
 }

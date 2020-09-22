@@ -126,7 +126,7 @@ public abstract class ObjectActivity extends PermissionActivity {
     public void clickResultMediaData() {
         if (!DataUtils.isListEmpty(mCheckMediaData) && mMediaOption != null) {
             if (mMediaOption.isCrop) {
-                MediaFile mediaFile = mCheckMediaData.get(0);
+                MediaFile mediaFile = mCheckMediaData.get(mCheckMediaData.size() - 1);
                 if (mediaFile.mediaType == MediaFile.TYPE_IMAGE) {
                     File firstFile = new File(mediaFile.filePath);
                     File lastFile = FileUtils.createChildDirector(FileUtils.MEDIA_FOLDER, FileUtils.getRootFile(this));
@@ -235,15 +235,16 @@ public abstract class ObjectActivity extends PermissionActivity {
         if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
             final Uri resultUri = UCrop.getOutput(data);
             if (resultUri != null && resultUri.getPath() != null) {
-
+                String filePath = resultUri.getPath();
+                MediaFile mediaFile = MediaFile.createMediaImageFile(filePath);
+                mCheckMediaData.add(mediaFile);
+                resultMediaData();
             }
             Log.w("onActivityResult--", resultUri.getPath() + "--");
         } else if (resultCode == UCrop.RESULT_ERROR) {
             final Throwable cropError = UCrop.getError(data);
+            Log.w("onActivityResult--", cropError + "--");
         }
     }
 
-    public void openCamera() {
-
-    }
 }

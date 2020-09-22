@@ -1,9 +1,14 @@
 package com.xiaobai.media.bean;
 
+import android.graphics.BitmapFactory;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
+
+import com.xiaobai.media.utils.FileUtils;
+
+import java.io.File;
 
 public class MediaFile implements Parcelable {
     public static final int TYPE_IMAGE = 0;
@@ -83,5 +88,24 @@ public class MediaFile implements Parcelable {
 
     public static boolean isVideo(MediaFile mediaFile) {
         return mediaFile != null && mediaFile.mediaType == MediaFile.TYPE_VIDEO;
+    }
+
+    public static MediaFile createMediaImageFile(String filePath) {
+        if (!FileUtils.existsFile(filePath)) {
+            return null;
+        }
+        MediaFile mediaFile = new MediaFile();
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(filePath, options);
+        mediaFile.width = options.outWidth;
+        mediaFile.height = options.outHeight;
+        File file = new File(filePath);
+        mediaFile.fileName = file.getName();
+        mediaFile.filePath = filePath;
+        mediaFile.mediaType = MediaFile.TYPE_IMAGE;
+        mediaFile.fileSize = (int) file.length();
+        mediaFile.parentPath = file.getPath();
+        return mediaFile;
     }
 }

@@ -94,7 +94,7 @@ public class PreviewActivity extends ObjectActivity {
 
 
     private void initPreview() {
-        updateTitleSureText(mTopTitleView.mTvSure, mCheckMediaData, mMediaOption.maxSelectorMediaCount);
+        updateTitleSureText(mTopTitleView.mTvSure, mCheckMediaData);
 
         mPreviewAdapter = new PreviewMediaAdapter(this, mMediaFileData);
         mVpContent.setAdapter(mPreviewAdapter);
@@ -145,7 +145,7 @@ public class PreviewActivity extends ObjectActivity {
 
                 updateCheckMediaData();
                 updateCheckView();
-                updateTitleSureText(mTopTitleView.mTvSure, mCheckMediaData, mMediaOption.maxSelectorMediaCount);
+                updateTitleSureText(mTopTitleView.mTvSure, mCheckMediaData);
             }
         });
         mVpContent.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {

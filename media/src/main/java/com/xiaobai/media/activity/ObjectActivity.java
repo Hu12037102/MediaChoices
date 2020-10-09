@@ -88,9 +88,7 @@ public abstract class ObjectActivity extends PermissionActivity {
                 decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
             }
         } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-            }
+            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         }
     }
 
@@ -110,7 +108,7 @@ public abstract class ObjectActivity extends PermissionActivity {
                 .start(activity);
     }
 
-    public void updateTitleSureText(@NonNull TextView textView, @NonNull List<MediaFile> checkMediaData, int maxSelectorSize) {
+    public void updateTitleSureText(@NonNull TextView textView, @NonNull List<MediaFile> checkMediaData) {
         if (DataUtils.getListSize(checkMediaData) <= 0) {
             textView.setEnabled(false);
             textView.setTextColor(ContextCompat.getColor(this, R.color.color4));

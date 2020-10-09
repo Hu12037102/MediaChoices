@@ -160,7 +160,7 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
 
             @Override
             public void onCheckMediaChange(@NonNull View view, int position, boolean isCheck) {
-                updateTitleSureText(mTitleViewTop.mTvSure, mCheckMediaData, mMediaOption.maxSelectorMediaCount);
+                updateTitleSureText(mTitleViewTop.mTvSure, mCheckMediaData);
             }
         });
     }
@@ -221,7 +221,7 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
 
     @Override
     public void onMediaSucceed(@NonNull List<MediaFolder> data) {
-        updateTitleSureText(mTitleViewTop.mTvSure, mCheckMediaData, mMediaOption.maxSelectorMediaCount);
+        updateTitleSureText(mTitleViewTop.mTvSure, mCheckMediaData);
         if (DataUtils.getListSize(data) > 0) {
             mAllMediaFolderData.addAll(data);
             mMediaFileData.addAll(data.get(0).fileData);
@@ -253,13 +253,14 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
                 //当从上一个页面返回时候回调（非点击完成按钮）
             } else if (resultCode == PreviewActivity.RESULT_CODE_BACK) {
                 ArrayList<MediaFile> checkMediaFile = data.getParcelableArrayListExtra(ObjectActivity.KEY_PARCELABLE_LIST_CHECK_DATA);
-                if (!DataUtils.isListEmpty(checkMediaFile)) {
-                    if (mCheckMediaData.size() > 0) {
-                        mCheckMediaData.clear();
-                    }
-                    mCheckMediaData.addAll(checkMediaFile);
-                    mMediaFileAdapter.notifyDataSetChanged();
+                if (mCheckMediaData.size() > 0) {
+                    mCheckMediaData.clear();
                 }
+                if (checkMediaFile != null) {
+                    mCheckMediaData.addAll(checkMediaFile);
+                }
+                mMediaFileAdapter.notifyDataSetChanged();
+                updateTitleSureText(mTitleViewTop.mTvSure, mCheckMediaData);
             }
         } else if (requestCode == MediaActivity.REQUEST_CODE_OPEN_CAMERA) {
             if (resultCode == Activity.RESULT_OK && FileUtils.existsFile(mCameraFile.getAbsolutePath())) {

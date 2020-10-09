@@ -229,22 +229,5 @@ public abstract class ObjectActivity extends PermissionActivity {
         finish();
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
-            final Uri resultUri = UCrop.getOutput(data);
-            if (resultUri != null && resultUri.getPath() != null) {
-                String filePath = resultUri.getPath();
-                MediaFile mediaFile = MediaFile.createMediaImageFile(filePath);
-                mCheckMediaData.add(mediaFile);
-                resultMediaData();
-            }
-            Log.w("onActivityResult--", resultUri.getPath() + "--");
-        } else if (resultCode == UCrop.RESULT_ERROR) {
-            final Throwable cropError = UCrop.getError(data);
-            Log.w("onActivityResult--", cropError + "--");
-        }
-    }
 
 }

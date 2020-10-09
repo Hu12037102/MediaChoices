@@ -26,6 +26,7 @@ import com.xiaobai.media.utils.DataUtils;
 import com.xiaobai.media.utils.ScreenUtils;
 import com.xiaobai.media.weight.TitleView;
 import com.xiaobai.media.weight.Toasts;
+import com.yalantis.ucrop.UCrop;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -272,5 +273,24 @@ public class PreviewActivity extends ObjectActivity {
         clickBackForResult();
         super.onBackPressed();
 
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
+            final Uri resultUri = UCrop.getOutput(data);
+            if (resultUri != null && resultUri.getPath() != null) {
+                String filePath = resultUri.getPath();
+                MediaFile mediaFile = MediaFile.createMediaImageFile(filePath);
+                mCheckMediaData.clear();
+                mCheckMediaData.add(mediaFile);
+                resultMediaData();
+            }
+            Log.w("onActivityResult--", resultUri.getPath() + "--");
+        } else if (resultCode == UCrop.RESULT_ERROR) {
+            final Throwable cropError = UCrop.getError(data);
+            Log.w("onActivityResult--", cropError + "--");
+        }
     }
 }

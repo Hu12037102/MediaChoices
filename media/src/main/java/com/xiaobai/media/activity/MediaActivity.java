@@ -246,7 +246,8 @@ public class MediaActivity extends ObjectActivity implements OnLoadMediaCallback
             if (resultCode == Activity.RESULT_OK && data != null) {
                 ArrayList<MediaFile> checkMediaFile = data.getParcelableArrayListExtra(MediaSelector.KEY_PARCELABLE_MEDIA_DATA);
                 if (!DataUtils.isListEmpty(checkMediaFile)) {
-                    // clickResultMediaData(checkMediaFile);
+                    mCheckMediaData.clear();
+                    mCheckMediaData.addAll(checkMediaFile);
                     resultMediaData();
                 }
                 //当从上一个页面返回时候回调（非点击完成按钮）
